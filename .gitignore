@@ -1,0 +1,11 @@
+bin/
+obj/
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userprefs
+node_modules/
+wwwroot/css/app.css
+!wwwroot/css/app.min.css

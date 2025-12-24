@@ -1,0 +1,409 @@
+@import "tailwindcss";
+
+@theme {
+    --font-sans: "Outfit", sans-serif;
+    --font-mono: "JetBrains Mono", monospace;
+    --font-cyber: "Orbitron", sans-serif;
+
+    --color-obsidian: #0f172a;
+    /* Slate 900 */
+    --color-surface: #1e293b;
+    /* Slate 800 */
+    --color-card: #334155;
+    /* Slate 700 */
+    --color-border-custom: rgba(255, 255, 255, 0.1);
+
+    --color-brand-violet: #3b82f6;
+    /* Blue 500 (Primary) */
+    --color-brand-cyan: #0ea5e9;
+    /* Sky 500 (Secondary) */
+    --color-brand-orange: #f59e0b;
+    /* Amber 500 (Warning/Accent) */
+    --color-brand-purple: #6366f1;
+    /* Indigo 500 (Tertiary) */
+
+    --animate-pulse-slow: pulse 3s infinite;
+    --animate-pop: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    --animate-float: float 6s ease-in-out infinite;
+
+    @keyframes pop {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.15);
+        }
+
+        100% {
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+}
+
+body {
+    background-color: var(--color-obsidian);
+    color: #f1f5f9;
+    /* Slate 100 */
+    overflow-x: hidden;
+    touch-action: none;
+    /* Crucial for game touch controls */
+}
+
+@layer components {
+
+    /* Ambient Background - Clean & Professional */
+    .bg-ambient {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.15), transparent 40%),
+            radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.1), transparent 40%);
+        pointer-events: none;
+    }
+
+    /* --- UI ELEMENTS --- */
+    .glass-nav {
+        background: rgba(2, 4, 10, 0.8);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-link {
+        position: relative;
+        font-weight: 500;
+        color: #94a3b8;
+        transition: color 0.3s;
+    }
+
+    .nav-link:hover {
+        color: #fff;
+    }
+
+    .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #2dd4bf;
+        transition: width 0.3s ease;
+    }
+
+    .nav-link:hover::after {
+        width: 100%;
+    }
+
+    /* Nav Pill Style */
+    .nav-pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border-radius: 9999px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #94a3b8;
+        transition: all 0.2s ease;
+        background: transparent;
+    }
+
+    .nav-pill:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-pill.active {
+        color: #fff;
+        background: rgba(59, 130, 246, 0.15);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    /* Game Container */
+    #game-container {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16/9;
+        margin: 0 auto;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 20px 60px -10px rgba(0, 0, 0, 0.7);
+        background: #0f111a;
+        cursor: none;
+    }
+
+    canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Tech Cards (Deck) */
+    .tech-card {
+        background: #161b27;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        min-height: 80px;
+    }
+
+    .tech-card.unlocked {
+        background: linear-gradient(180deg, #1e293b 0%, var(--tech-bg-glow) 100%);
+        border-color: var(--tech-color);
+        box-shadow: 0 0 25px var(--tech-color-dim), inset 0 0 15px var(--tech-color-dim);
+        transform: scale(1.05);
+        z-index: 10;
+    }
+
+    .tech-card.unlocked i {
+        color: var(--tech-color) !important;
+        filter: drop-shadow(0 0 8px var(--tech-color));
+        transform: scale(1.15);
+    }
+
+    .tech-card.pop-active {
+        animation: pop 0.4s ease-out forwards;
+    }
+
+    /* Company Cards */
+    .company-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s;
+    }
+
+    .company-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.04);
+        border-color: var(--brand-color);
+        box-shadow: 0 10px 30px -10px var(--brand-shadow);
+    }
+
+    /* Overlay Text */
+    .overlay-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        pointer-events: none;
+        z-index: 20;
+        transition: opacity 0.3s ease;
+        width: 100%;
+    }
+
+    #start-screen {
+        pointer-events: auto;
+    }
+
+    .victory-title {
+        background: linear-gradient(to bottom, #ffd700, #f59e0b, #b45309);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 10px rgba(234, 179, 8, 0.5));
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .powerup-text {
+        position: absolute;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: bold;
+        font-size: 24px;
+        color: white;
+        text-shadow: 0 0 10px currentColor;
+        pointer-events: none;
+        animation: floatUpFade 1.5s forwards;
+        z-index: 15;
+        width: 100%;
+        text-align: center;
+        left: 0;
+    }
+
+    @keyframes floatUpFade {
+        0% {
+            transform: translateY(0) scale(0.8);
+            opacity: 0;
+        }
+
+        20% {
+            transform: translateY(-20px) scale(1.2);
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateY(-80px) scale(1);
+            opacity: 0;
+        }
+    }
+
+    .game-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    /* Powerup Icons in HUD */
+    .hud-icon {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        animation: pop 0.3s ease-out;
+    }
+
+    .hud-icon i {
+        font-size: 14px;
+    }
+
+    .hud-icon svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* Tech Stack Cards */
+    .tech-stack-card {
+        background: rgba(30, 41, 59, 0.3);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .tech-stack-card:hover {
+        background: rgba(30, 41, 59, 0.5);
+        border-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-4px);
+    }
+
+    /* Service Cards */
+    .service-card {
+        background: rgba(30, 41, 59, 0.2);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .service-card:hover {
+        background: rgba(30, 41, 59, 0.4);
+        border-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-4px);
+    }
+
+    .service-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+
+    /* Game Cards */
+    .game-card {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .game-cover {
+        aspect-ratio: 3/4;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .game-card:hover .game-cover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .platform-tag {
+        font-size: 9px;
+        padding: 2px 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        color: #94a3b8;
+        font-family: monospace;
+    }
+
+    /* Blog Cards */
+    .blog-card {
+        background: rgba(30, 41, 59, 0.2);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .blog-card:hover {
+        background: rgba(30, 41, 59, 0.4);
+        border-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-4px);
+    }
+
+    .blog-card-image {
+        height: 160px;
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.5) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Line clamp utility */
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Text gradient utility */
+    .text-gradient {
+        background: linear-gradient(to right, #7c3aed, #06b6d4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+}

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="HelloWorld" xml:space="preserve">
+    <value>Olá Mundo</value>
+  </data>
+  <data name="Nav_Home" xml:space="preserve">
+    <value>HOME</value>
+  </data>
+  <data name="Nav_About" xml:space="preserve">
+    <value>SOBRE MIM</value>
+  </data>
+  <data name="Nav_Companies" xml:space="preserve">
+    <value>EMPRESAS</value>
+  </data>
+  <data name="Nav_Blog" xml:space="preserve">
+    <value>BLOG</value>
+  </data>
+  <data name="Nav_Contact" xml:space="preserve">
+    <value>CONTATO</value>
+  </data>
+  <data name="Hero_Title" xml:space="preserve">
+    <value>Full Stack Player One</value>
+  </data>
+  <data name="Hero_Subtitle" xml:space="preserve">
+    <value>Transformando ideias em software robusto e jogos imersivos.</value>
+  </data>
+  <data name="Game_Start" xml:space="preserve">
+    <value>INICIAR SISTEMA</value>
+  </data>
+</root>

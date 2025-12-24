@@ -1,0 +1,599 @@
+﻿@page "/"
+@using WagenheimerDotCom.Services
+@using WagenheimerDotCom.Models
+@inject IStringLocalizer<SharedResource> Loc
+@inject IBlogService BlogService
+
+<PageTitle>Cezar Wagenheimer | Full Stack Developer & Game Creator</PageTitle>
+
+<!-- Hero Section with Game -->
+<section class="pt-10 pb-20 flex flex-col items-center justify-center min-h-[calc(100vh-80px)] relative z-10">
+    <div class="container mx-auto px-4 w-full">
+        
+        <div class="text-center mb-10 animate-float">
+            <p class="text-brand-cyan font-mono text-sm tracking-widest mb-4">FULL STACK DEVELOPER & GAME CREATOR</p>
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
+                Cezar <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-violet to-brand-cyan">Wagenheimer</span>
+            </h1>
+            <p class="text-slate-400 max-w-xl mx-auto text-lg font-light mb-6">
+                Transformando ideias em software há mais de 20 anos. Especialista em .NET, Unity e soluções digitais de alto impacto.
+            </p>
+            
+            <!-- Stats -->
+            <div class="flex justify-center gap-8 md:gap-12 text-center">
+                <div>
+                    <div class="text-3xl md:text-4xl font-bold text-white">20+</div>
+                    <div class="text-xs text-slate-500 font-mono uppercase tracking-wider">Anos</div>
+                </div>
+                <div>
+                    <div class="text-3xl md:text-4xl font-bold text-brand-orange">30+</div>
+                    <div class="text-xs text-slate-500 font-mono uppercase tracking-wider">Jogos</div>
+                </div>
+                <div>
+                    <div class="text-3xl md:text-4xl font-bold text-brand-purple">5M+</div>
+                    <div class="text-xs text-slate-500 font-mono uppercase tracking-wider">Downloads</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME AREA -->
+        <div class="flex flex-col w-full max-w-[900px] mx-auto gap-4">
+            
+            <!-- TOP DECK -->
+            <div class="grid grid-cols-3 gap-4 w-full">
+                <div id="card-csharp" class="tech-card rounded-t-xl p-3 flex flex-col items-center justify-center text-center group" style="--tech-color: #d946ef; --tech-color-dim: rgba(217, 70, 239, 0.4); --tech-bg-glow: rgba(217, 70, 239, 0.15);">
+                    <i class="devicon-csharp-plain text-3xl text-slate-600 transition duration-300 mb-1"></i>
+                    <h3 class="font-cyber text-[10px] font-bold text-white tracking-wide">C# CORE</h3>
+                    <span class="text-[9px] text-brand-purple font-mono mt-1 opacity-0 group-hover:opacity-100 transition">POWER: PENETRATION</span>
+                </div>
+                <div id="card-unity" class="tech-card rounded-t-xl p-3 flex flex-col items-center justify-center text-center group" style="--tech-color: #cbd5e1; --tech-color-dim: rgba(203, 213, 225, 0.4); --tech-bg-glow: rgba(203, 213, 225, 0.1);">
+                    <i class="devicon-unity-plain text-3xl text-slate-600 transition duration-300 mb-1"></i>
+                    <h3 class="font-cyber text-[10px] font-bold text-white tracking-wide">UNITY</h3>
+                    <span class="text-[9px] text-slate-300 font-mono mt-1 opacity-0 group-hover:opacity-100 transition">POWER: MULTI-BALL</span>
+                </div>
+                <div id="card-blazor" class="tech-card rounded-t-xl p-3 flex flex-col items-center justify-center text-center group" style="--tech-color: #06b6d4; --tech-color-dim: rgba(6, 182, 212, 0.4); --tech-bg-glow: rgba(6, 182, 212, 0.15);">
+                    <i class="devicon-dotnetcore-plain text-3xl text-slate-600 transition duration-300 mb-1"></i>
+                    <h3 class="font-cyber text-[10px] font-bold text-white tracking-wide">BLAZOR</h3>
+                    <span class="text-[9px] text-brand-cyan font-mono mt-1 opacity-0 group-hover:opacity-100 transition">POWER: WIDE PADDLE</span>
+                </div>
+            </div>
+
+            <!-- GAME SCREEN -->
+            <div id="game-container" class="w-full shadow-[0_0_60px_rgba(6,182,212,0.1)] border border-white/10">
+                <div class="game-grid"></div>
+                
+                <div id="start-screen" class="overlay-text">
+                    <h2 class="text-5xl md:text-7xl font-cyber font-bold text-white mb-4 drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">READY?</h2>
+                    <button class="bg-gradient-to-r from-brand-purple to-brand-cyan text-white font-mono text-sm font-bold py-3 px-8 rounded-full animate-pulse hover:scale-105 transition shadow-[0_0_30px_rgba(217,70,239,0.4)]">
+                        INICIAR SISTEMA
+                    </button>
+                </div>
+
+                <div id="powerup-display" class="absolute top-1/2 left-0 w-full pointer-events-none z-30"></div>
+
+                <div id="game-ui" class="absolute top-4 left-6 right-6 flex justify-between pointer-events-none opacity-0 transition-opacity duration-500 z-20">
+                    <div class="flex items-center gap-4">
+                        <div class="font-cyber text-white text-xs tracking-wider font-bold drop-shadow-md">SCORE: <span id="score-val" class="text-brand-orange">0</span></div>
+                        <div id="powerups-hud" class="flex gap-1"></div>
+                    </div>
+                    <div class="font-cyber text-white text-xs tracking-wider font-bold drop-shadow-md">LIVES: <span id="lives-val" class="text-brand-purple">❤❤❤</span></div>
+                </div>
+
+                <canvas id="canvas"></canvas>
+            </div>
+
+            <!-- BOTTOM DECK -->
+            <div class="grid grid-cols-3 gap-4 w-full">
+                <div id="card-aspnet" class="tech-card rounded-b-xl p-3 flex flex-col items-center justify-center text-center group" style="--tech-color: #8b5cf6; --tech-color-dim: rgba(139, 92, 246, 0.4); --tech-bg-glow: rgba(139, 92, 246, 0.15);">
+                    <i class="devicon-dotnetcore-plain text-3xl text-slate-600 transition duration-300 mb-1"></i>
+                    <h3 class="font-cyber text-[10px] font-bold text-white tracking-wide">ASP.NET</h3>
+                    <span class="text-[9px] text-violet-400 font-mono mt-1 opacity-0 group-hover:opacity-100 transition">POWER: LASERS</span>
+                </div>
+                <div id="card-maui" class="tech-card rounded-b-xl p-3 flex flex-col items-center justify-center text-center group" style="--tech-color: #f43f5e; --tech-color-dim: rgba(244, 63, 94, 0.4); --tech-bg-glow: rgba(244, 63, 94, 0.15);">
+                    <i data-lucide="smartphone" class="w-8 h-8 text-slate-600 transition duration-300 mb-1"></i>
+                    <h3 class="font-cyber text-[10px] font-bold text-white tracking-wide">MAUI</h3>
+                    <span class="text-[9px] text-red-400 font-mono mt-1 opacity-0 group-hover:opacity-100 transition">POWER: SAFETY NET</span>
+                </div>
+                <div id="card-postgres" class="tech-card rounded-b-xl p-3 flex flex-col items-center justify-center text-center group" style="--tech-color: #3b82f6; --tech-color-dim: rgba(59, 130, 246, 0.4); --tech-bg-glow: rgba(59, 130, 246, 0.15);">
+                    <i class="devicon-postgresql-plain text-3xl text-slate-600 transition duration-300 mb-1"></i>
+                    <h3 class="font-cyber text-[10px] font-bold text-white tracking-wide">POSTGRES</h3>
+                    <span class="text-[9px] text-blue-400 font-mono mt-1 opacity-0 group-hover:opacity-100 transition">POWER: GIANT BALL</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ABOUT SECTION -->
+<section id="about" class="py-24 bg-surface relative z-10 border-t border-border">
+    <div class="container mx-auto px-6">
+        <div class="flex items-center gap-4 mb-12">
+            <div class="h-px bg-white/10 flex-grow"></div>
+            <h2 class="text-3xl font-bold text-white tracking-tight">SOBRE MIM</h2>
+            <div class="h-px bg-white/10 flex-grow"></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <!-- Photo/Avatar -->
+            <div class="flex justify-center">
+                <div class="relative">
+                    <div class="w-64 h-64 rounded-2xl bg-gradient-to-br from-brand-violet to-brand-cyan p-1">
+                        <div class="w-full h-full rounded-2xl bg-surface flex items-center justify-center">
+                            <i data-lucide="user" class="w-24 h-24 text-slate-600"></i>
+                        </div>
+                    </div>
+                    <div class="absolute -bottom-4 -right-4 bg-card border border-white/10 rounded-xl px-4 py-2">
+                        <span class="text-brand-cyan font-mono text-sm">🇧🇷 Londrina, PR</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bio -->
+            <div>
+                <h3 class="text-2xl font-bold text-white mb-4">Desenvolvedor Full Stack & Criador de Jogos</h3>
+                <p class="text-slate-400 mb-6 leading-relaxed">
+                    Com mais de <span class="text-white font-semibold">20 anos de experiência</span> em desenvolvimento de software, 
+                    sou especialista em C#, .NET e Unity. Co-fundador dos estúdios 
+                    <span class="text-green-400">Green Sauce Games</span> e <span class="text-cyan-400">Seven Sails Games</span>, 
+                    já lancei mais de 30 jogos e apps com milhões de downloads.
+                </p>
+                <p class="text-slate-400 mb-6 leading-relaxed">
+                    Através da <span class="text-blue-400">CWSoftware</span>, ofereço consultoria especializada em 
+                    arquitetura de software corporativo, desenvolvimento mobile com .NET MAUI, 
+                    e criação de sistemas web modernos com Blazor.
+                </p>
+
+                <!-- Published Platforms -->
+                <div class="mb-6">
+                    <p class="text-xs text-slate-500 font-mono uppercase mb-3">Publicado em:</p>
+                    <div class="flex flex-wrap gap-3">
+                        <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                            <i data-lucide="gamepad-2" class="w-4 h-4 text-slate-400"></i>
+                            <span class="text-white text-xs font-semibold">Steam</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                            <i data-lucide="gamepad-2" class="w-4 h-4 text-red-400"></i>
+                            <span class="text-white text-xs font-semibold">Nintendo Switch</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                            <i data-lucide="gamepad-2" class="w-4 h-4 text-green-400"></i>
+                            <span class="text-white text-xs font-semibold">Xbox</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                            <i class="devicon-apple-original text-lg text-slate-300"></i>
+                            <span class="text-white text-xs font-semibold">App Store</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                            <i class="devicon-android-plain text-lg text-green-400"></i>
+                            <span class="text-white text-xs font-semibold">Google Play</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                            <i data-lucide="monitor" class="w-4 h-4 text-blue-400"></i>
+                            <span class="text-white text-xs font-semibold">Microsoft Store</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills Tags -->
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1 bg-violet-500/10 border border-violet-500/30 rounded-full text-violet-400 text-xs font-mono">.NET Expert</span>
+                    <span class="px-3 py-1 bg-slate-500/10 border border-slate-500/30 rounded-full text-slate-400 text-xs font-mono">Unity Developer</span>
+                    <span class="px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-cyan-400 text-xs font-mono">Blazor/MAUI</span>
+                    <span class="px-3 py-1 bg-orange-500/10 border border-orange-500/30 rounded-full text-orange-400 text-xs font-mono">Game Design</span>
+                    <span class="px-3 py-1 bg-blue-500/10 border border-blue-500/30 rounded-full text-blue-400 text-xs font-mono">Entrepreneur</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- TECH STACK SECTION -->
+<section id="stack" class="py-24 relative z-10 border-t border-border">
+    <div class="container mx-auto px-6">
+        <div class="flex items-center gap-4 mb-12">
+            <div class="h-px bg-white/10 flex-grow"></div>
+            <h2 class="text-3xl font-bold text-white tracking-tight">TECH STACK</h2>
+            <div class="h-px bg-white/10 flex-grow"></div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            <!-- C# -->
+            <div class="tech-stack-card group">
+                <i class="devicon-csharp-plain text-4xl text-purple-400 group-hover:scale-110 transition"></i>
+                <span class="text-white text-sm font-semibold mt-2">C#</span>
+                <span class="text-slate-500 text-xs">20+ anos</span>
+            </div>
+            <!-- .NET -->
+            <div class="tech-stack-card group">
+                <i class="devicon-dotnetcore-plain text-4xl text-violet-400 group-hover:scale-110 transition"></i>
+                <span class="text-white text-sm font-semibold mt-2">.NET</span>
+                <span class="text-slate-500 text-xs">Core & 8+</span>
+            </div>
+            <!-- ASP.NET Core -->
+            <div class="tech-stack-card group">
+                <i class="devicon-dotnetcore-plain text-4xl text-violet-500 group-hover:scale-110 transition"></i>
+                <span class="text-white text-sm font-semibold mt-2">ASP.NET Core</span>
+                <span class="text-slate-500 text-xs">Backend</span>
+            </div>
+            <!-- Unity -->
+            <div class="tech-stack-card group">
+                <i class="devicon-unity-plain text-4xl text-slate-300 group-hover:scale-110 transition"></i>
+                <span class="text-white text-sm font-semibold mt-2">Unity</span>
+                <span class="text-slate-500 text-xs">2D & 3D</span>
+            </div>
+            <!-- Blazor -->
+            <div class="tech-stack-card group">
+                <i class="devicon-blazor-plain text-4xl text-cyan-400 group-hover:scale-110 transition"></i>
+                <span class="text-white text-sm font-semibold mt-2">Blazor</span>
+                <span class="text-slate-500 text-xs">WASM & Server</span>
+            </div>
+            <!-- MAUI -->
+            <div class="tech-stack-card group">
+                <i class="devicon-dotnetcore-plain text-4xl text-red-400 group-hover:scale-110 transition"></i>
+                <span class="text-white text-sm font-semibold mt-2">.NET MAUI</span>
+                <span class="text-slate-500 text-xs">Cross-platform</span>
+            </div>
+            <!-- PostgreSQL -->
+            <div class="tech-stack-card group">
+                <i class="devicon-postgresql-plain text-4xl text-blue-400 group-hover:scale-110 transition"></i>
+                <span class="text-white text-sm font-semibold mt-2">PostgreSQL</span>
+                <span class="text-slate-500 text-xs">Database</span>
+            </div>
+            <!-- SQL Server -->
+            <div class="tech-stack-card group">
+                <i class="devicon-microsoftsqlserver-plain text-4xl text-red-500 group-hover:scale-110 transition"></i>
+                <span class="text-white text-sm font-semibold mt-2">SQL Server</span>
+                <span class="text-slate-500 text-xs">Database</span>
+            </div>
+            <!-- Coolify -->
+            <div class="tech-stack-card group">
+                <i data-lucide="server" class="w-10 h-10 text-emerald-400 group-hover:scale-110 transition"></i>
+                <span class="text-white text-sm font-semibold mt-2">Coolify</span>
+                <span class="text-slate-500 text-xs">Hostinger</span>
+            </div>
+            <!-- Docker -->
+            <div class="tech-stack-card group">
+                <i class="devicon-docker-plain text-4xl text-cyan-500 group-hover:scale-110 transition"></i>
+                <span class="text-white text-sm font-semibold mt-2">Docker</span>
+                <span class="text-slate-500 text-xs">Containers</span>
+            </div>
+            <!-- Git -->
+            <div class="tech-stack-card group">
+                <i class="devicon-git-plain text-4xl text-orange-500 group-hover:scale-110 transition"></i>
+                <span class="text-white text-sm font-semibold mt-2">Git</span>
+                <span class="text-slate-500 text-xs">Version Control</span>
+            </div>
+            <!-- iOS & Android -->
+            <div class="tech-stack-card group">
+                <i class="devicon-android-plain text-4xl text-green-400 group-hover:scale-110 transition"></i>
+                <span class="text-white text-sm font-semibold mt-2">iOS & Android</span>
+                <span class="text-slate-500 text-xs">Mobile Apps</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SERVICES SECTION -->
+<section id="services" class="py-24 bg-surface relative z-10 border-t border-border">
+    <div class="container mx-auto px-6">
+        <div class="flex items-center gap-4 mb-4">
+            <div class="h-px bg-white/10 flex-grow"></div>
+            <h2 class="text-3xl font-bold text-white tracking-tight">SERVIÇOS</h2>
+            <div class="h-px bg-white/10 flex-grow"></div>
+        </div>
+        <p class="text-center text-slate-400 mb-12 max-w-2xl mx-auto">
+            Soluções digitais completas para transformar seu negócio. Da ideia ao deploy.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Mobile Apps -->
+            <div class="service-card">
+                <div class="service-icon bg-red-500/10 text-red-400">
+                    <i data-lucide="smartphone" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Aplicativos Mobile</h3>
+                <p class="text-slate-400 text-sm mb-4">
+                    Apps nativos para Android e iOS com .NET MAUI. UX fluida, offline-first, e publicação nas lojas.
+                </p>
+                <ul class="text-xs text-slate-500 space-y-1">
+                    <li>• Android & iOS</li>
+                    <li>• .NET MAUI / Xamarin</li>
+                    <li>• Publicação nas lojas</li>
+                </ul>
+            </div>
+
+            <!-- Web Systems -->
+            <div class="service-card">
+                <div class="service-icon bg-cyan-500/10 text-cyan-400">
+                    <i data-lucide="layout-dashboard" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Sistemas Web</h3>
+                <p class="text-slate-400 text-sm mb-4">
+                    Dashboards interativos e sistemas modernos com Blazor. APIs robustas com ASP.NET Core.
+                </p>
+                <ul class="text-xs text-slate-500 space-y-1">
+                    <li>• Blazor WASM/Server</li>
+                    <li>• APIs RESTful</li>
+                    <li>• Cloud-ready</li>
+                </ul>
+            </div>
+
+            <!-- Game Development -->
+            <div class="service-card">
+                <div class="service-icon bg-green-500/10 text-green-400">
+                    <i data-lucide="gamepad-2" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Jogos Digitais</h3>
+                <p class="text-slate-400 text-sm mb-4">
+                    Desenvolvimento de jogos 2D/3D com Unity. Do conceito à publicação em múltiplas plataformas.
+                </p>
+                <ul class="text-xs text-slate-500 space-y-1">
+                    <li>• Unity 2D & 3D</li>
+                    <li>• PC, Mobile, Consoles</li>
+                    <li>• Gamificação corporativa</li>
+                </ul>
+            </div>
+
+            <!-- Desktop Software -->
+            <div class="service-card">
+                <div class="service-icon bg-blue-500/10 text-blue-400">
+                    <i data-lucide="monitor" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Software Desktop</h3>
+                <p class="text-slate-400 text-sm mb-4">
+                    Aplicações Windows robustas para operações internas, PDV, e gestão administrativa.
+                </p>
+                <ul class="text-xs text-slate-500 space-y-1">
+                    <li>• WPF / WinForms</li>
+                    <li>• Integração hardware</li>
+                    <li>• Alta performance</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- COMPANIES SECTION -->
+<section id="companies" class="py-24 relative z-10 border-t border-border">
+    <div class="container mx-auto px-6">
+        <div class="flex items-center gap-4 mb-12">
+            <div class="h-px bg-white/10 flex-grow"></div>
+            <h2 class="text-3xl font-bold text-white tracking-tight">MEU ECOSSISTEMA</h2>
+            <div class="h-px bg-white/10 flex-grow"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+            <!-- CW Software -->
+            <article class="company-card rounded-2xl p-8 flex flex-col" style="--brand-color: #3b82f6; --brand-shadow: rgba(59, 130, 246, 0.2);">
+                <div class="w-14 h-14 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 text-blue-500 border border-blue-500/20">
+                    <i data-lucide="code-2" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">CW SOFTWARE</h3>
+                <p class="text-xs font-mono text-blue-400 mb-4 tracking-widest">SOLUÇÕES DIGITAIS</p>
+                <p class="text-slate-400 text-sm leading-relaxed mb-6 flex-grow">
+                    Consultoria especializada em arquitetura de software corporativo, microsserviços e desenvolvimento .NET de alta complexidade. Transformando desafios em soluções.
+                </p>
+                <a href="https://cwsoftware.com.br" target="_blank" class="inline-flex items-center text-sm font-bold text-white hover:text-blue-400 transition">
+                    Visitar Site <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                </a>
+            </article>
+
+            <!-- Green Sauce Games -->
+            <article class="company-card rounded-2xl p-8 flex flex-col" style="--brand-color: #22c55e; --brand-shadow: rgba(34, 197, 94, 0.2);">
+                <div class="w-14 h-14 bg-green-500/10 rounded-xl flex items-center justify-center mb-6 text-green-500 border border-green-500/20">
+                    <i data-lucide="gamepad-2" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">GREEN SAUCE GAMES</h3>
+                <p class="text-xs font-mono text-green-400 mb-4 tracking-widest">INDIE GAME STUDIO</p>
+                <p class="text-slate-400 text-sm leading-relaxed mb-6 flex-grow">
+                    Estúdio indie focado em jogos Match-3 e Solitaire de alta qualidade. Séries como Secrets of Magic e Hope's Farm com milhões de downloads.
+                </p>
+                <a href="https://greensaucegames.com" target="_blank" class="inline-flex items-center text-sm font-bold text-white hover:text-green-400 transition">
+                    Ver Jogos <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                </a>
+            </article>
+
+            <!-- Seven Sails Games -->
+            <article class="company-card rounded-2xl p-8 flex flex-col" style="--brand-color: #0ea5e9; --brand-shadow: rgba(14, 165, 233, 0.2);">
+                <div class="w-14 h-14 bg-cyan-500/10 rounded-xl flex items-center justify-center mb-6 text-cyan-500 border border-cyan-500/20">
+                    <i data-lucide="anchor" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">SEVEN SAILS GAMES</h3>
+                <p class="text-xs font-mono text-cyan-400 mb-4 tracking-widest">ADVENTURE & PUZZLE</p>
+                <p class="text-slate-400 text-sm leading-relaxed mb-6 flex-grow">
+                    Jogos de aventura casual e puzzles com temática náutica. Séries Queen's Garden e Fables Mosaic para PC e consoles.
+                </p>
+                <a href="#" class="inline-flex items-center text-sm font-bold text-white hover:text-cyan-400 transition">
+                    Explorar <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                </a>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURED GAMES SECTION -->
+<section id="games" class="py-24 bg-surface relative z-10 border-t border-border">
+    <div class="container mx-auto px-6">
+        <div class="flex items-center gap-4 mb-4">
+            <div class="h-px bg-white/10 flex-grow"></div>
+            <h2 class="text-3xl font-bold text-white tracking-tight">JOGOS EM DESTAQUE</h2>
+            <div class="h-px bg-white/10 flex-grow"></div>
+        </div>
+        <p class="text-center text-slate-400 mb-12 max-w-2xl mx-auto">
+            Alguns dos títulos que ajudei a criar ao longo dos anos.
+        </p>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <!-- Game Cards -->
+            <div class="game-card group">
+                <div class="game-cover bg-gradient-to-br from-purple-600 to-pink-600">
+                    <i data-lucide="wand-2" class="w-12 h-12 text-white/80"></i>
+                </div>
+                <h4 class="text-white text-sm font-semibold mt-2">Secrets of Magic 5</h4>
+                <div class="flex gap-1 mt-1">
+                    <span class="platform-tag">Steam</span>
+                    <span class="platform-tag">Switch</span>
+                </div>
+            </div>
+
+            <div class="game-card group">
+                <div class="game-cover bg-gradient-to-br from-green-600 to-emerald-600">
+                    <i data-lucide="flower-2" class="w-12 h-12 text-white/80"></i>
+                </div>
+                <h4 class="text-white text-sm font-semibold mt-2">Hope's Farm 2</h4>
+                <div class="flex gap-1 mt-1">
+                    <span class="platform-tag">Steam</span>
+                    <span class="platform-tag">Mobile</span>
+                </div>
+            </div>
+
+            <div class="game-card group">
+                <div class="game-cover bg-gradient-to-br from-amber-600 to-orange-600">
+                    <i data-lucide="pyramid" class="w-12 h-12 text-white/80"></i>
+                </div>
+                <h4 class="text-white text-sm font-semibold mt-2">Ancient Relics</h4>
+                <div class="flex gap-1 mt-1">
+                    <span class="platform-tag">Steam</span>
+                    <span class="platform-tag">Xbox</span>
+                </div>
+            </div>
+
+            <div class="game-card group">
+                <div class="game-cover bg-gradient-to-br from-blue-600 to-cyan-600">
+                    <i data-lucide="cloud-lightning" class="w-12 h-12 text-white/80"></i>
+                </div>
+                <h4 class="text-white text-sm font-semibold mt-2">Storm Tale 2</h4>
+                <div class="flex gap-1 mt-1">
+                    <span class="platform-tag">Steam</span>
+                </div>
+            </div>
+
+            <div class="game-card group">
+                <div class="game-cover bg-gradient-to-br from-rose-600 to-pink-600">
+                    <i data-lucide="fan" class="w-12 h-12 text-white/80"></i>
+                </div>
+                <h4 class="text-white text-sm font-semibold mt-2">Dreams of a Geisha</h4>
+                <div class="flex gap-1 mt-1">
+                    <span class="platform-tag">Steam</span>
+                    <span class="platform-tag">Mobile</span>
+                </div>
+            </div>
+
+            <div class="game-card group">
+                <div class="game-cover bg-gradient-to-br from-slate-600 to-slate-800">
+                    <i data-lucide="skull" class="w-12 h-12 text-white/80"></i>
+                </div>
+                <h4 class="text-white text-sm font-semibold mt-2">Day of the Dead</h4>
+                <div class="flex gap-1 mt-1">
+                    <span class="platform-tag">Steam</span>
+                    <span class="platform-tag">Switch</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-10">
+            <a href="https://greensaucegames.com" target="_blank" class="inline-flex items-center gap-2 text-brand-cyan hover:text-white transition font-semibold">
+                Ver todos os jogos <i data-lucide="external-link" class="w-4 h-4"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- BLOG SECTION -->
+<section id="blog" class="py-24 relative z-10 border-t border-border">
+    <div class="container mx-auto px-6">
+        <div class="flex items-center gap-4 mb-4">
+            <div class="h-px bg-white/10 flex-grow"></div>
+            <h2 class="text-3xl font-bold text-white tracking-tight">BLOG</h2>
+            <div class="h-px bg-white/10 flex-grow"></div>
+        </div>
+        <p class="text-center text-slate-400 mb-12 max-w-2xl mx-auto">
+            Artigos sobre desenvolvimento, games e tecnologia.
+        </p>
+
+        @if (latestPosts != null && latestPosts.Any())
+        {
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                @foreach (var post in latestPosts)
+                {
+                    <article class="blog-card group">
+                        <div class="blog-card-image">
+                            <i data-lucide="file-text" class="w-12 h-12 text-slate-600 group-hover:text-brand-cyan transition"></i>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-xs text-slate-500 font-mono">@post.Date.ToString("dd MMM yyyy")</span>
+                                @if (post.Tags != null && post.Tags.Any())
+                                {
+                                    <span class="text-xs bg-brand-violet/20 text-brand-violet px-2 py-0.5 rounded">@post.Tags.First()</span>
+                                }
+                            </div>
+                            <h3 class="text-lg font-bold text-white mb-2 group-hover:text-brand-cyan transition">
+                                <a href="/blog/@post.Slug">@post.Title</a>
+                            </h3>
+                            <p class="text-slate-400 text-sm line-clamp-2">@post.Description</p>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center text-slate-500">
+                <p>Nenhum post disponível ainda. Volte em breve!</p>
+            </div>
+        }
+
+        <div class="text-center mt-10">
+            <a href="/blog" class="inline-flex items-center gap-2 text-brand-cyan hover:text-white transition font-semibold">
+                Ver todos os posts <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT SECTION -->
+<section id="contact" class="py-24 bg-surface relative overflow-hidden border-t border-border">
+    <div class="container mx-auto px-6 relative z-10">
+        <div class="max-w-4xl mx-auto bg-card border border-white/5 rounded-2xl p-8 md:p-12 shadow-2xl">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-white mb-4">Vamos Criar Algo Incrível?</h2>
+                <p class="text-slate-400">Tem um projeto em mente? Entre em contato para discutirmos como posso ajudar.</p>
+            </div>
+
+            <form class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-xs font-mono text-slate-500 uppercase">Nome</label>
+                        <input type="text" class="w-full bg-obsidian border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-violet transition">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-mono text-slate-500 uppercase">Email</label>
+                        <input type="email" class="w-full bg-obsidian border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-violet transition">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-mono text-slate-500 uppercase">Mensagem</label>
+                    <textarea rows="4" class="w-full bg-obsidian border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-violet transition"></textarea>
+                </div>
+                <button type="button" class="w-full bg-gradient-to-r from-brand-violet to-brand-cyan hover:opacity-90 text-white font-bold py-4 rounded-lg transition shadow-lg">
+                    ENVIAR MENSAGEM
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script src="js/game.js"></script>
+
+@code {
+    private IEnumerable<BlogPost>? latestPosts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var allPosts = await BlogService.GetPostsAsync();
+        latestPosts = allPosts.Take(3);
+    }
+}

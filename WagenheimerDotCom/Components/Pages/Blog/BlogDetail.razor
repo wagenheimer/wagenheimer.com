@@ -1,0 +1,122 @@
+@page "/blog/{slug}"
+@using WagenheimerDotCom.Models
+@using WagenheimerDotCom.Services
+@inject IBlogService BlogService
+@inject NavigationManager Nav
+
+@if (post == null)
+{
+    <PageTitle>Carregando...</PageTitle>
+    <div class="container mx-auto px-6 py-24 text-center">
+        <div class="animate-pulse text-slate-500">Carregando...</div>
+    </div>
+}
+else
+{
+    <PageTitle>@post.Title | Cezar Wagenheimer</PageTitle>
+
+    <article class="py-24 min-h-screen relative z-10">
+        <div class="container mx-auto px-6">
+            <!-- Article Header -->
+            <header class="max-w-3xl mx-auto mb-12 text-center">
+                <!-- Back Link -->
+                <a href="/blog" class="inline-flex items-center gap-2 text-slate-400 hover:text-brand-cyan transition text-sm mb-8">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    Voltar para o Blog
+                </a>
+
+                <!-- Date -->
+                <div class="text-sm font-mono text-brand-cyan mb-4">
+                    @post.Date.ToString("dd MMMM yyyy")
+                </div>
+
+                <!-- Title -->
+                <h1 class="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">
+                    @post.Title
+                </h1>
+
+                <!-- Tags -->
+                @if (post.Tags != null && post.Tags.Any())
+                {
+                    <div class="flex justify-center gap-2 flex-wrap">
+                        @foreach (var tag in post.Tags)
+                        {
+                            <span class="text-xs uppercase font-bold text-brand-violet bg-brand-violet/10 px-3 py-1 rounded-full border border-brand-violet/20">
+                                @tag
+                            </span>
+                        }
+                    </div>
+                }
+            </header>
+
+            <!-- Article Content -->
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-card border border-white/5 rounded-2xl p-8 md:p-12">
+                    <div class="prose prose-invert prose-lg max-w-none 
+                                prose-headings:font-bold prose-headings:text-white 
+                                prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4
+                                prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3
+                                prose-p:text-slate-300 prose-p:leading-relaxed
+                                prose-a:text-brand-cyan prose-a:no-underline hover:prose-a:underline
+                                prose-strong:text-white
+                                prose-code:text-brand-violet prose-code:bg-white/5 prose-code:px-1 prose-code:rounded
+                                prose-pre:bg-obsidian prose-pre:border prose-pre:border-white/10 prose-pre:rounded-xl
+                                prose-ul:text-slate-300 prose-ol:text-slate-300
+                                prose-li:marker:text-brand-cyan
+                                prose-blockquote:border-brand-violet prose-blockquote:bg-brand-violet/5 prose-blockquote:rounded-r-lg prose-blockquote:py-1">
+                        @((MarkupString)post.Content)
+                    </div>
+                </div>
+
+                <!-- Author Section -->
+                <div class="mt-12 bg-surface border border-white/5 rounded-2xl p-6 flex items-center gap-6">
+                    <div class="w-16 h-16 rounded-full bg-gradient-to-br from-brand-violet to-brand-cyan p-0.5 flex-shrink-0">
+                        <div class="w-full h-full rounded-full bg-surface flex items-center justify-center">
+                            <i data-lucide="user" class="w-8 h-8 text-slate-600"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-white font-bold">Cezar Wagenheimer</div>
+                        <div class="text-slate-400 text-sm">Full Stack Developer & Game Creator</div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="mt-12 pt-8 border-t border-white/10 flex justify-between items-center">
+                    <a href="/blog" class="inline-flex items-center gap-2 text-brand-cyan hover:text-white font-semibold transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        Voltar para o Blog
+                    </a>
+                    <div class="flex gap-4">
+                        <a href="https://twitter.com/intent/tweet?url=@(Uri.EscapeDataString(Nav.Uri))&text=@(Uri.EscapeDataString(post.Title))" 
+                           target="_blank" 
+                           class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">
+                            <i data-lucide="twitter" class="w-4 h-4"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url=@(Uri.EscapeDataString(Nav.Uri))" 
+                           target="_blank" 
+                           class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">
+                            <i data-lucide="linkedin" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </article>
+}
+
+@code {
+    [Parameter]
+    public string Slug { get; set; } = "";
+
+    private BlogPost? post;
+
+    protected override async Task OnInitializedAsync()
+    {
+        post = await BlogService.GetPostBySlugAsync(Slug);
+        if (post == null)
+        {
+            Nav.NavigateTo("not-found");
+        }
+    }
+}

@@ -1,0 +1,130 @@
+﻿@inherits LayoutComponentBase
+@inject IStringLocalizer<SharedResource> Loc
+
+<div class="bg-ambient"></div>
+
+<!-- Navigation -->
+<nav class="fixed top-0 w-full z-50 glass-nav">
+    <div class="container mx-auto px-6 h-20 flex items-center justify-between">
+        <!-- Logo -->
+        <a href="/" class="flex items-center gap-4 group">
+            <!-- Animated Logo Mark -->
+            <div class="relative">
+                <div class="w-12 h-12 bg-gradient-to-br from-brand-violet via-brand-purple to-brand-cyan rounded-xl flex items-center justify-center font-bold text-white font-cyber text-lg shadow-lg group-hover:shadow-brand-violet/40 transition-shadow duration-300">
+                    <span class="relative z-10">CW</span>
+                </div>
+                <!-- Glow effect on hover -->
+                <div class="absolute inset-0 bg-gradient-to-br from-brand-violet to-brand-cyan rounded-xl blur-lg opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
+            </div>
+            
+            <!-- Brand Text -->
+            <div class="flex flex-col">
+                <div class="flex items-baseline gap-1">
+                    <span class="font-bold text-xl text-white tracking-tight">wagenheimer</span>
+                    <span class="text-brand-cyan font-bold text-xl">.com</span>
+                </div>
+                <span class="text-[10px] text-slate-500 font-mono tracking-[0.2em] uppercase">Cezar Wagenheimer</span>
+            </div>
+        </a>
+        
+        <!-- Menu Desktop -->
+        <div class="hidden md:flex items-center gap-1">
+            <a href="/" class="nav-pill">
+                <i data-lucide="home" class="w-4 h-4"></i>
+                <span>Home</span>
+            </a>
+            <a href="#about" class="nav-pill">
+                <i data-lucide="user" class="w-4 h-4"></i>
+                <span>Sobre</span>
+            </a>
+            <a href="#stack" class="nav-pill">
+                <i data-lucide="layers" class="w-4 h-4"></i>
+                <span>Stack</span>
+            </a>
+            <a href="#companies" class="nav-pill">
+                <i data-lucide="building-2" class="w-4 h-4"></i>
+                <span>Empresas</span>
+            </a>
+            <a href="/blog" class="nav-pill">
+                <i data-lucide="pen-line" class="w-4 h-4"></i>
+                <span>Blog</span>
+            </a>
+        </div>
+
+        <!-- CTA + Social -->
+        <div class="hidden md:flex items-center gap-4">
+            <!-- Social Icons -->
+            <div class="flex items-center gap-2">
+                <a href="https://github.com/wagenheimer" target="_blank" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 hover:border-white/20 transition">
+                    <i class="devicon-github-original text-lg"></i>
+                </a>
+                <a href="https://linkedin.com/in/wagenheimer" target="_blank" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 hover:border-white/20 transition">
+                    <i class="devicon-linkedin-plain text-lg"></i>
+                </a>
+            </div>
+            
+            <!-- Divider -->
+            <div class="w-px h-6 bg-white/10"></div>
+            
+            <!-- CTA Button -->
+            <a href="#contact" class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-brand-violet to-brand-cyan text-white font-bold text-xs rounded-full hover:shadow-lg hover:shadow-brand-violet/30 transition-all duration-300">
+                <span>CONTATO</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+        </div>
+
+        <!-- Mobile Menu Btn -->
+        <button class="md:hidden w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+    </div>
+</nav>
+
+<main class="min-h-screen pt-20">
+    @Body
+</main>
+
+<!-- Footer -->
+<footer class="bg-obsidian border-t border-white/5 py-12 relative z-10">
+    <div class="container mx-auto px-6">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+            <!-- Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-brand-violet to-brand-cyan rounded-xl flex items-center justify-center font-bold text-white font-cyber text-sm">CW</div>
+                <div>
+                    <span class="font-bold text-white">wagenheimer<span class="text-brand-cyan">.com</span></span>
+                </div>
+            </div>
+            
+            <!-- Links -->
+            <div class="flex items-center gap-6 text-sm">
+                <a href="/" class="text-slate-400 hover:text-white transition">Home</a>
+                <a href="#about" class="text-slate-400 hover:text-white transition">Sobre</a>
+                <a href="/blog" class="text-slate-400 hover:text-white transition">Blog</a>
+                <a href="#contact" class="text-slate-400 hover:text-white transition">Contato</a>
+            </div>
+            
+            <!-- Social -->
+            <div class="flex items-center gap-3">
+                <a href="https://github.com/wagenheimer" target="_blank" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 transition">
+                    <i class="devicon-github-original text-lg"></i>
+                </a>
+                <a href="https://linkedin.com/in/wagenheimer" target="_blank" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 transition">
+                    <i class="devicon-linkedin-plain text-lg"></i>
+                </a>
+                <a href="https://twitter.com/wagenheimer" target="_blank" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 transition">
+                    <i data-lucide="twitter" class="w-4 h-4"></i>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Copyright -->
+        <div class="mt-8 pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center text-xs text-slate-600 font-mono">
+            <p>© 2025 Cezar Wagenheimer. Todos os direitos reservados.</p>
+            <div class="flex items-center gap-2 mt-4 md:mt-0 opacity-70 hover:opacity-100 transition">
+                <i class="devicon-blazor-plain text-sm text-brand-cyan"></i>
+                <span>Powered by .NET Blazor</span>
+            </div>
+        </div>
+    </div>
+</footer>
