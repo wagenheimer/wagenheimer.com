@@ -1,12 +1,13 @@
 # 🚀 wagenheimer.com
 
 > The personal portfolio and digital playground of **Cezar Wagenheimer**.
-> Built with **.NET 8 Blazor Web App**, **Tailwind CSS v4**, and **Unity WebGL** concepts.
+> Built with **.NET 10 Blazor Web App**, **Tailwind CSS v4**, and **Unity/WebGL** concepts.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![.NET](https://img.shields.io/badge/.NET-8.0-purple)
+![.NET](https://img.shields.io/badge/.NET-10.0-purple)
 ![Blazor](https://img.shields.io/badge/Blazor-Web%20App-purple)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4.0-cyan)
+![Docker](https://img.shields.io/badge/Docker-Enabled-blue)
 
 ## 🌟 Overview
 
@@ -16,117 +17,89 @@ The site features a custom **Breakout-style game** embedded directly in the Hero
 
 ## ✨ Key Features
 
--   ** Hybrid Rendering**: Utilizes Blazor's Auto render mode for instant initial load (SSR) and seamless interactivity.
--   **🎮 Interactive Game**: A custom JavaScript/Canvas game engine integrated with Blazor, featuring particle systems, audio synthesis, and physics.
--   **📝 Markdown Blog**: Built-in blog engine using `Markdig` with YAML frontmatter support. No database required – just drop `.md` files in `_posts`.
--   **🎨 Enterprise Modern Theme**: A custom Tailwind CSS v4 design system featuring a deep slate palette, glassmorphism effects, and professional typography.
--   **🌍 Localization**: Native .NET localization (`IStringLocalizer`) supporting English and Portuguese (pt-BR).
--   **📱 Fully Responsive**: Optimized for Mobile, Tablet, and Desktop with touch controls for the game.
+- **🚀 .NET 10 Powered**: Leveraging the latest performance and syntax improvements of the .NET ecosystem.
+- **🎮 Interactive Game**: A custom JavaScript/Canvas game engine integrated with Blazor, featuring particle systems, audio synthesis, and physics.
+- **📝 Markdown Engine**: Highly optimized blog and game showcase based on `Markdig`. No database required.
+- **🔐 Integrated Admin**: Full-featured administrative dashboard to manage content and moderate comments.
+- **🎨 Tailwind CSS v4**: A modern design system featuring a deep slate palette, glassmorphism effects, and professional typography.
+- **🌍 Localization**: Native .NET localization (`IStringLocalizer`) supporting English and Portuguese.
 
 ## 🛠️ Tech Stack
 
--   **Framework**: .NET 8 Blazor Web App
--   **Languages**: C#, JavaScript, HTML5, CSS3
--   **Styling**: Tailwind CSS v4 (configured via CSS variables)
--   **Icons**: Lucide Icons & Devicon
--   **Blog Parsing**: Markdig
--   **Hosting**: Docker / Coolify (Linux)
+- **Framework**: .NET 10 Blazor Web App (Interactive Auto)
+- **Styling**: Tailwind CSS v4 (Minified via PostCSS/Node.js)
+- **Content**: Markdown + Frontmatter (Markdig)
+- **Persistence**: Flat-file JSON (Comments, High Scores, Settings)
+- **Deployment**: Docker & Docker Compose (Coolify/Hostinger compatible)
+
+## 🏗️ Internal Architecture
+
+### 🔑 Admin & Authentication
+The application includes a secure administrative area at `/admin`.
+- **Authentication**: Custom cookie-based authentication configured in `Program.cs`.
+- **Login**: Accessed via `/admin/login`.
+- **Features**:
+  - **Dashboard**: Overview of site activity.
+  - **Post Editor**: Real-time Markdown editor with live preview.
+  - **Comment Moderation**: Approve or delete user comments before they go public.
+  - **Game Management**: Configure featured games and titles.
+
+### 📝 Content Management
+Content is managed via Markdown files, making the site extremely fast and easy to backup/version.
+- **Blog Posts**: Located in `WagenheimerDotCom/_posts/`. Supports YAML frontmatter for metadata (slug, title, date).
+- **Games**: Managed in `WagenheimerDotCom/_games/`.
+- **Data persistence**: Dynamic data like High Scores and Comments are stored as JSON in the `WagenheimerDotCom/_data/` directory.
+
+### 🌍 Localization
+Fully localized using standard .NET `.resx` files located in the `Resources/` folder.
+- Supports runtime language switching.
+- SEO-friendly URL structure for different languages.
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
--   [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
--   [Node.js](https://nodejs.org/) (for Tailwind CSS compilation)
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- [Node.js 20+](https://nodejs.org/) (required for Tailwind CSS build steps)
+- [Docker](https://www.docker.com/) (optional, for containerized deployment)
 
 ### Installation
 
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/wagenheimer/wagenheimer.com.git
-    cd wagenheimer.com
-    ```
+1. **Clone and Install**
+   ```bash
+   git clone https://github.com/wagenheimer/wagenheimer.com.git
+   cd wagenheimer.com
+   dotnet restore
+   npm install
+   ```
 
-2.  **Restore dependencies**
-    ```bash
-    dotnet restore
-    npm install
-    ```
+2. **Development**
+   Run the included watcher script for hot-reload and Tailwind compilation:
+   ```powershell
+   .\start-dev.ps1
+   ```
 
-3.  **Run the local development server**
-    We've included a PowerShell script to automate the Tailwind watcher and .NET hot reload:
-    ```powershell
-    .\start-dev.ps1
-    ```
-    *Or run manually:*
-    ```bash
-    npm run watch:css
-    dotnet watch run --project WagenheimerDotCom/WagenheimerDotCom.csproj
-    ```
+### 🐳 Deployment
 
-4.  **Access the site**
-    Open `http://localhost:5275` in your browser.
+The project is optimized for **Coolify** or standard Docker environments:
+
+```bash
+docker compose up -d --build
+```
+The build process handles everything from CSS minification to the final .NET publish.
 
 ## 📂 Project Structure
 
 ```
 WagenheimerDotCom/
-├── Components/
-│   ├── Layout/          # MainLayout, NavMenu
-│   ├── Pages/
-│   │   ├── Blog/        # Blog Index and Detail pages
-│   │   └── Home.razor   # Main Landing Page
-│   └── _Imports.razor
-├── Resources/           # Localization files (.resx)
-├── Services/            # MarkdownBlogService, etc.
-├── Styles/
-│   └── app.css          # Main Tailwind CSS source
-├── wwwroot/
-│   ├── css/             # Compiled CSS
-│   ├── js/              # Game engine (game.js)
-│   └── images/
-├── _posts/              # Markdown blog posts
-└── Program.cs           # DI and App Configuration
-```
-
-## 📝 Managing Content
-
-### Adding a Blog Post
-Create a new `.md` file in `WagenheimerDotCom/_posts/`:
-
-```markdown
----
-title: "My New Post"
-date: "2025-12-24"
-description: "A brief summary for the card preview."
-tags: ["dotnet", "blazor"]
-slug: "my-new-post"
----
-
-# Hello World
-Write your content here using standard Markdown...
-```
-
-### Localizing Text
-Edit the resource files in `WagenheimerDotCom/Resources/`:
--   `SharedResource.en.resx` (English)
--   `SharedResource.pt.resx` (Portuguese)
-
-## 🎨 Customization
-
-The theme is defined in `Styles/app.css` using CSS variables:
-
-```css
-:root {
-    --color-obsidian: #0f172a;
-    --color-brand-violet: #3b82f6;
-    --color-brand-cyan: #0ea5e9;
-}
-```
-
-To rebuild CSS after changes:
-```bash
-npm run build:css
+├── Components/          # Blazor Components & Pages
+├── Resources/           # Localization (.resx)
+├── Services/            # Business Logic & Blog Engine
+├── Styles/              # Tailwind CSS Source (app.css)
+├── wwwroot/             # Static Assets & Compiled CSS
+├── _posts/              # Markdown blog content
+├── Dockerfile           # Production build definition
+└── docker-compose.yaml  # Deployment orchestration
 ```
 
 ## 📄 License
@@ -134,4 +107,4 @@ npm run build:css
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
-**Powered by .NET Blazor** | Created by [Cezar Wagenheimer](https://wagenheimer.com)
+**Powered by .NET 10** | Created by [Cezar Wagenheimer](https://wagenheimer.com)
