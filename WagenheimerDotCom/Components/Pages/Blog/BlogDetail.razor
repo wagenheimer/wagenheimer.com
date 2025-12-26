@@ -1,19 +1,36 @@
 @page "/blog/{slug}"
 @using WagenheimerDotCom.Models
 @using WagenheimerDotCom.Services
+@using System.Globalization
 @inject IBlogService BlogService
 @inject NavigationManager Nav
 
 @if (post == null)
 {
-    <PageTitle>Carregando...</PageTitle>
+    <PageTitle>Loading...</PageTitle>
     <div class="container mx-auto px-6 py-24 text-center">
-        <div class="animate-pulse text-slate-500">Carregando...</div>
+        <div class="animate-pulse text-slate-500">Loading...</div>
     </div>
 }
 else
 {
     <PageTitle>@post.Title | Cezar Wagenheimer</PageTitle>
+    <HeadContent>
+        <meta name="description" content="@post.Description" />
+        <meta name="keywords" content="@(post.Tags != null ? string.Join(", ", post.Tags) : "")" />
+        
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content="@Nav.Uri" />
+        <meta property="og:title" content="@post.Title" />
+        <meta property="og:description" content="@post.Description" />
+        
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="@Nav.Uri" />
+        <meta property="twitter:title" content="@post.Title" />
+        <meta property="twitter:description" content="@post.Description" />
+    </HeadContent>
 
     <article class="py-24 min-h-screen relative z-10">
         <div class="container mx-auto px-6">
@@ -100,23 +117,112 @@ else
                         </a>
                     </div>
                 </div>
+
+                <!-- COMMMENTS SECTION -->
+                <div class="mt-16 pt-12 border-t border-white/10">
+                    <h3 class="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+                        <i data-lucide="message-square" class="w-6 h-6 text-brand-purple"></i>
+                        Comentários
+                    </h3>
+
+                    <!-- List -->
+                    @if (comments.Any())
+                    {
+                        <div class="space-y-6 mb-12">
+                            @foreach (var comment in comments)
+                            {
+                                <div class="bg-surface border border-white/5 rounded-xl p-6">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div>
+                                            <div class="font-bold text-brand-cyan">@comment.Author</div>
+                                            <div class="text-xs text-slate-500 font-mono">@comment.Date.ToString("dd MMMM yyyy")</div>
+                                        </div>
+                                    </div>
+                                    <p class="text-slate-300 text-sm leading-relaxed">@comment.Content</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-slate-500 italic mb-12">Seja o primeiro a comentar!</div>
+                    }
+
+                    <!-- Form -->
+                    <div class="bg-black/20 rounded-2xl p-8 border border-white/5">
+                        <h4 class="text-lg font-bold text-white mb-6">Deixe seu comentário</h4>
+                        
+                        @if (commentSuccess)
+                        {
+                            <div class="bg-green-500/10 border border-green-500/20 rounded-lg p-4 text-center">
+                                <p class="text-green-400">Comentário enviado com sucesso! Aguardando aprovação.</p>
+                                <button @onclick="() => commentSuccess = false" class="text-slate-400 text-xs mt-2 hover:underline">Enviar outro</button>
+                            </div>
+                        }
+                        else
+                        {
+                            <EditForm Model="@newComment" OnValidSubmit="HandleCommentSubmit" class="space-y-4">
+                                <DataAnnotationsValidator />
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <InputText @bind-Value="newComment.Author" placeholder="Nome" class="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-purple transition" />
+                                        <ValidationMessage For="@(() => newComment.Author)" class="text-red-400 text-xs" />
+                                    </div>
+                                    <div>
+                                        <InputText @bind-Value="newComment.Email" placeholder="Email (não será publicado)" class="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-purple transition" />
+                                        <ValidationMessage For="@(() => newComment.Email)" class="text-red-400 text-xs" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <InputTextArea @bind-Value="newComment.Content" rows="4" placeholder="Escreva seu comentário..." class="w-full bg-surface border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-purple transition" />
+                                    <ValidationMessage For="@(() => newComment.Content)" class="text-red-400 text-xs" />
+                                </div>
+                                <button type="submit" disabled="@submittingComment" class="bg-brand-purple text-white font-bold py-3 px-8 rounded-lg hover:bg-brand-violet transition disabled:opacity-50">
+                                    @(submittingComment ? "Enviando..." : "Publicar Comentário")
+                                </button>
+                            </EditForm>
+                        }
+                    </div>
+                </div>
             </div>
         </div>
     </article>
 }
+
+@inject ICommentService CommentService
 
 @code {
     [Parameter]
     public string Slug { get; set; } = "";
 
     private BlogPost? post;
+    private IEnumerable<Comment> comments = Array.Empty<Comment>();
+    private Comment newComment = new();
+    private bool submittingComment = false;
+    private bool commentSuccess = false;
 
     protected override async Task OnInitializedAsync()
     {
-        post = await BlogService.GetPostBySlugAsync(Slug);
+        var lang = CultureInfo.CurrentUICulture.Name;
+        post = await BlogService.GetPostBySlugAsync(Slug, lang);
+        
         if (post == null)
         {
             Nav.NavigateTo("not-found");
+            return;
         }
+
+        comments = await CommentService.GetCommentsForPostAsync(Slug);
+    }
+
+    private async Task HandleCommentSubmit()
+    {
+        submittingComment = true;
+        newComment.PostSlug = Slug;
+        await CommentService.AddCommentAsync(newComment);
+        
+        newComment = new(); // Reset form
+        submittingComment = false;
+        commentSuccess = true;
     }
 }

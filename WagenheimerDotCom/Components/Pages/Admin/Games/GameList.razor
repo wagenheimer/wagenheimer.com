@@ -1,0 +1,102 @@
+@page "/admin/games"
+@layout WagenheimerDotCom.Components.Layout.AdminLayout
+@rendermode InteractiveServer
+@attribute [Authorize]
+@inject WagenheimerDotCom.Services.IGameService GameService
+@inject NavigationManager NavManager
+
+<PageTitle>Games - Admin</PageTitle>
+
+<div class="flex items-center justify-between mb-8">
+    <h1 class="text-3xl font-bold text-white">Games</h1>
+    <a href="/admin/games/new" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        <span>New Game</span>
+    </a>
+</div>
+
+<div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+    <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center">
+        <h2 class="text-white font-bold">All Games</h2>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-slate-700/50 text-slate-400 text-xs uppercase">
+                <tr>
+                    <th class="px-6 py-3">Title</th>
+                    <th class="px-6 py-3">Release</th>
+                    <th class="px-6 py-3">Tags</th>
+                    <th class="px-6 py-3">Featured</th>
+                    <th class="px-6 py-3 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-700">
+                @foreach (var game in games)
+                {
+                    <tr class="hover:bg-slate-700/30 transition">
+                        <td class="px-6 py-4 font-medium text-white flex items-center gap-3">
+                            <img src="@game.CoverImage" alt="@game.Title" class="w-10 h-10 rounded object-cover bg-slate-700" onerror="this.src='/favicon.png'" />
+                            <span>@game.Title</span>
+                        </td>
+                        <td class="px-6 py-4 text-slate-400">@game.ReleaseDate.ToShortDateString()</td>
+                        <td class="px-6 py-4">
+                            <div class="flex gap-1 flex-wrap">
+                                @foreach (var tag in game.Tags ?? Array.Empty<string>())
+                                {
+                                    <span class="px-2 py-0.5 bg-slate-700 rounded text-xs text-slate-300">@tag</span>
+                                }
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            @if(game.IsFeatured)
+                            {
+                                <span class="text-yellow-400 flex items-center gap-1 text-xs font-bold uppercase">
+                                    <i data-lucide="star" class="w-3 h-3 fill-yellow-400"></i> Featured
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-slate-500 text-xs uppercase">No</span>
+                            }
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="/admin/games/edit/@game.Slug" class="p-2 text-blue-400 hover:bg-blue-500/10 rounded transition" title="Edit">
+                                    <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                </a>
+                                <button @onclick="() => DeleteGame(game.Slug)" class="p-2 text-red-400 hover:bg-red-500/10 rounded transition" title="Delete">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private IEnumerable<WagenheimerDotCom.Models.GameProject> games = Array.Empty<WagenheimerDotCom.Models.GameProject>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        games = await GameService.GetGamesAsync();
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+         if (firstRender)
+         {
+             await JSRuntime.InvokeVoidAsync("lucide.createIcons");
+         }
+    }
+    [Inject] IJSRuntime JSRuntime { get; set; }
+
+    private async Task DeleteGame(string slug)
+    {
+        await GameService.DeleteGameAsync(slug);
+        games = await GameService.GetGamesAsync();
+    }
+}

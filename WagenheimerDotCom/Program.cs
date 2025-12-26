@@ -6,10 +6,30 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveWebAssemblyComponents();
+    .AddInteractiveWebAssemblyComponents()
+    .AddInteractiveServerComponents();
 
 builder.Services.AddSingleton<WagenheimerDotCom.Services.IBlogService, WagenheimerDotCom.Services.MarkdownBlogService>();
+builder.Services.AddSingleton<WagenheimerDotCom.Services.IGameService, WagenheimerDotCom.Services.MarkdownGameService>();
+builder.Services.AddScoped<WagenheimerDotCom.Services.IContactService, WagenheimerDotCom.Services.ContactService>();
+builder.Services.AddScoped<WagenheimerDotCom.Services.IHighScoreService, WagenheimerDotCom.Services.HighScoreService>();
+builder.Services.AddScoped<WagenheimerDotCom.Services.ICommentService, WagenheimerDotCom.Services.CommentService>();
 builder.Services.AddLocalization();
+// ... (Auth setup unchanged) ...
+
+// ...
+
+// (Removed redundant block)
+
+builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/admin/login";
+        options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    });
+builder.Services.AddAuthorization();
+builder.Services.AddControllers();
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
@@ -36,12 +56,17 @@ var localizationOptions = new RequestLocalizationOptions()
 
 app.UseRequestLocalization(localizationOptions);
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseAntiforgery();
 
 app.UseStaticFiles();
 app.MapStaticAssets();
+app.MapControllers();
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
+    .AddInteractiveServerRenderMode()
     .AddAdditionalAssemblies(typeof(WagenheimerDotCom.Client._Imports).Assembly);
 
 app.Run();

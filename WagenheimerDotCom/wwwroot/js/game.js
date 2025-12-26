@@ -58,21 +58,73 @@ if (!canvas) {
     window.addEventListener('resize', resize);
 
     // Input
-    let mouseX = 0;
+    let mouseX = width / 2; // Start center
+
+    function updateMouse(x) {
+        mouseX = x;
+        // Clamp
+        if (mouseX < 0) mouseX = 0;
+        if (mouseX > width) mouseX = width;
+    }
+
     document.addEventListener('mousemove', e => {
-        const rect = canvas.getBoundingClientRect();
-        mouseX = e.clientX - rect.left;
+        if (document.pointerLockElement === canvas) {
+            updateMouse(mouseX + e.movementX);
+        } else {
+            const rect = canvas.getBoundingClientRect();
+            updateMouse(e.clientX - rect.left);
+        }
     });
 
     document.addEventListener('touchmove', e => {
         const rect = canvas.getBoundingClientRect();
-        mouseX = e.touches[0].clientX - rect.left;
+        updateMouse(e.touches[0].clientX - rect.left);
     }, { passive: true });
 
+    // Pointer Lock State Handling
+    document.addEventListener('pointerlockchange', () => {
+        if (document.pointerLockElement === canvas) {
+            // Locked
+            if (!gameRunning && lives > 0 && unlockedTechs < totalTechs && balls.length > 0) {
+                gameRunning = true; // Resume if was paused
+            }
+        } else {
+            // Unlocked
+            if (gameRunning) {
+                gameRunning = false;
+                startScreen.innerHTML = `
+                    <div class="flex flex-col items-center">
+                        <h2 class="text-4xl font-cyber font-bold text-brand-orange mb-2 drop-shadow-lg">PAUSED</h2>
+                        <div class="text-white text-sm animate-pulse">(CLIQUE PARA CONTINUAR)</div>
+                    </div>`;
+                startScreen.style.opacity = 1;
+                startScreen.style.pointerEvents = 'auto'; // allow click to resume
+            }
+        }
+    });
+
     // Click on game container to start/reset
-    document.getElementById('game-container').addEventListener('click', () => {
-        if (!gameRunning && lives > 0 && unlockedTechs < totalTechs) startGame();
-        else if (!gameRunning) resetGame();
+    document.getElementById('game-container').addEventListener('click', async () => {
+        // If game over or fresh start
+        if ((!gameRunning && lives <= 0) || (unlockedTechs >= totalTechs)) {
+            resetGame(); // Reset first if game over
+            return;
+        }
+
+        // Request lock to play/resume
+        try {
+            if (!document.pointerLockElement) {
+                await canvas.requestPointerLock();
+            }
+
+            if (!gameRunning && lives > 0) {
+                startGame();
+            }
+        } catch (err) {
+            console.warn("Pointer lock denied:", err);
+            // Fallback play without lock
+            if (!gameRunning && lives > 0) startGame();
+        }
     });
 
     // --- CLASSES ---
@@ -449,6 +501,7 @@ if (!canvas) {
 
     function initGame() {
         resize();
+        mouseX = width / 2; // Initialize valid mouse position
         paddle = new Paddle();
         balls = [new Ball()];
         createBricks();
@@ -496,24 +549,28 @@ if (!canvas) {
         const fwInterval = setInterval(() => {
             spawnFireworks();
             fwCount++;
-            if (fwCount > 20) clearInterval(fwInterval);
-        }, 300);
+            if (fwCount > 50) clearInterval(fwInterval);
+        }, 100);
 
         startScreen.innerHTML = `
-            <div class="animate-victory-zoom flex flex-col items-center">
-                <div class="mb-2">
-                    <i data-lucide="award" class="w-16 h-16 text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]"></i>
-                </div>
-                <h2 class="victory-title text-4xl md:text-6xl font-bold mb-2">FULL STACK</h2>
-                <h2 class="text-white font-cyber text-2xl md:text-4xl mb-6 tracking-[0.5em] text-glow">UNLOCKED</h2>
-                
-                <div class="text-brand-orange font-mono font-bold text-xl mb-8 border border-brand-orange/50 inline-block px-6 py-2 rounded bg-black/80 backdrop-blur shadow-[0_0_20px_rgba(249,115,22,0.3)]">
-                    SCORE: ${score}
+            <div class="animate-victory-zoom flex flex-col items-center z-50 relative pointer-events-auto" onclick="event.stopPropagation()">
+                <div class="mb-4 relative">
+                    <div class="absolute -inset-4 bg-yellow-500/30 blur-xl animate-pulse rounded-full"></div>
+                    <i data-lucide="award" class="w-24 h-24 text-yellow-400 drop-shadow-[0_0_20px_rgba(250,204,21,1)] animate-bounce"></i>
                 </div>
                 
-                <button class="bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-brand-cyan hover:text-white transition shadow-lg animate-pulse" onclick="location.reload()">
-                    NOVO DESAFIO
-                </button>
+                <h2 class="victory-title text-4xl md:text-6xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-yellow-600 drop-shadow-sm">
+                    FULL STACK
+                </h2>
+                <h2 class="text-white font-cyber text-2xl md:text-4xl mb-8 tracking-[0.5em] text-glow animate-pulse">
+                    ACHIEVED!
+                </h2>
+                
+                <div class="flex flex-col gap-4 w-full max-w-xs">    
+                    <button class="text-slate-400 hover:text-white transition text-xs font-mono uppercase tracking-widest mt-4" onclick="location.reload()">
+                        [ JOGAR NOVAMENTE ]
+                    </button>
+                </div>
             </div>
         `;
         startScreen.style.opacity = 1;
@@ -538,7 +595,21 @@ if (!canvas) {
         gameRunning = false;
         fireworks = [];
 
-        startScreen.innerHTML = `<h2 class="text-5xl font-cyber font-bold text-white mb-2 drop-shadow-lg">READY?</h2><p class="text-brand-cyan font-mono text-sm animate-pulse tracking-widest bg-black/50 px-4 py-1 rounded">CLIQUE PARA INICIAR</p>`;
+        startScreen.innerHTML = `
+            <div class="cursor-pointer group flex flex-col items-center">
+                <div class="relative mb-6 group-hover:scale-105 transition duration-300">
+                    <h2 class="text-4xl md:text-6xl font-cyber font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-violet to-brand-cyan drop-shadow-[0_0_20px_rgba(6,182,212,0.5)]">
+                        TESTE SUAS<br/>HABILIDADES
+                    </h2>
+                    <div class="absolute -inset-1 blur-xl bg-gradient-to-r from-brand-violet to-brand-cyan opacity-20 group-hover:opacity-40 transition duration-500 animate-pulse"></div>
+                </div>
+                
+                <div class="relative overflow-hidden">
+                    <div class="text-white font-mono text-sm font-bold tracking-[0.2em] bg-black/60 px-8 py-3 rounded border border-brand-cyan/30 group-hover:border-brand-cyan/80 transition shadow-[0_0_15px_rgba(6,182,212,0.2)]">
+                        <span class="animate-pulse">CLIQUE PARA INICIAR</span>
+                    </div>
+                </div>
+            </div>`;
         startScreen.style.opacity = 1;
         startScreen.style.pointerEvents = 'auto';
 
@@ -548,6 +619,9 @@ if (!canvas) {
     function triggerTech(id, color, powerType) {
         timeScale = 0.2;
         shake = 20;
+
+        // Play Powerup Sound
+        playSound('powerup');
 
         bricks.forEach(b => {
             if (b.isTech && b.techId !== id && b.active) {
@@ -619,9 +693,25 @@ if (!canvas) {
 
         if (lives <= 0) {
             gameRunning = false;
-            startScreen.innerHTML = `<h2 class="text-brand-orange font-cyber font-bold text-4xl mb-2">GAME OVER</h2><p class="text-white text-sm">SCORE: ${score}</p><br><p class="text-slate-400 text-xs animate-pulse cursor-pointer">CLIQUE PARA REINICIAR</p>`;
+
+            if (document.pointerLockElement) {
+                document.exitPointerLock();
+            }
+
+            startScreen.innerHTML = `
+                <div class="flex flex-col items-center z-50 relative pointer-events-auto" onclick="event.stopPropagation()">
+                    <h2 class="text-brand-orange font-cyber font-bold text-5xl mb-2 drop-shadow-[0_0_10px_rgba(249,115,22,0.8)]">GAME OVER</h2>
+                    <p class="text-white text-lg font-mono mb-8">SCORE: ${score}</p>
+                    
+                    <button onclick="resetGame()" 
+                            class="bg-white/10 border border-white/20 text-white hover:bg-white hover:text-black font-bold py-3 px-8 rounded-full transition duration-300 font-mono text-sm tracking-widest cursor-pointer relative z-50">
+                        TENTAR NOVAMENTE
+                    </button>
+                    <div onclick="resetGame()" class="text-white/40 hover:text-white mt-4 cursor-pointer font-mono text-xs">(OU CLIQUE AQUI)</div>
+                </div>`;
             startScreen.style.opacity = 1;
             startScreen.style.pointerEvents = 'auto';
+            startScreen.style.display = 'flex';
         } else {
             balls = [new Ball()];
             setTimeout(() => { if (lives > 0 && balls[0]) balls[0].active = true; }, 1000);
@@ -648,6 +738,9 @@ if (!canvas) {
     // Audio
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(type) {
+        // Resume context if suspended (browser policy)
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
@@ -661,49 +754,67 @@ if (!canvas) {
             osc.frequency.exponentialRampToValueAtTime(600, now + 0.1);
             gain.gain.setValueAtTime(0.05, now);
             gain.gain.linearRampToValueAtTime(0, now + 0.1);
+            osc.start(now);
+            osc.stop(now + 0.1);
         } else if (type === 'break') {
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(200, now);
             osc.frequency.exponentialRampToValueAtTime(50, now + 0.1);
             gain.gain.setValueAtTime(0.05, now);
             gain.gain.linearRampToValueAtTime(0, now + 0.1);
+            osc.start(now);
+            osc.stop(now + 0.1);
         } else if (type === 'powerup') {
+            // Powerup Jingle (Coin-like)
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(400, now);
-            osc.frequency.linearRampToValueAtTime(800, now + 0.3);
+            osc.frequency.setValueAtTime(523.25, now); // C5
+            osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
             gain.gain.setValueAtTime(0.1, now);
-            gain.gain.linearRampToValueAtTime(0, now + 0.3);
+            gain.gain.linearRampToValueAtTime(0.1, now + 0.2);
+            gain.gain.linearRampToValueAtTime(0, now + 0.4);
+            osc.start(now);
+            osc.stop(now + 0.4);
         } else if (type === 'hit') {
             osc.type = 'sawtooth';
             osc.frequency.setValueAtTime(100, now);
             gain.gain.setValueAtTime(0.1, now);
             gain.gain.linearRampToValueAtTime(0, now + 0.2);
+            osc.start(now);
+            osc.stop(now + 0.2);
         } else if (type === 'laser') {
             osc.type = 'square';
             osc.frequency.setValueAtTime(800, now);
             osc.frequency.exponentialRampToValueAtTime(200, now + 0.1);
             gain.gain.setValueAtTime(0.005, now);
             gain.gain.linearRampToValueAtTime(0, now + 0.1);
+            osc.start(now);
+            osc.stop(now + 0.1);
         } else if (type === 'win') {
-            const notes = [523.25, 659.25, 783.99, 1046.50];
-            notes.forEach((freq, i) => {
+            // Victory Fanfare
+            const notes = [
+                { f: 523.25, d: 0.15, t: 0 },    // C5
+                { f: 523.25, d: 0.15, t: 0.15 }, // C5
+                { f: 523.25, d: 0.15, t: 0.30 }, // C5
+                { f: 659.25, d: 0.4, t: 0.45 }, // E5
+                { f: 587.33, d: 0.2, t: 0.85 }, // D5
+                { f: 659.25, d: 0.2, t: 1.05 }, // E5
+                { f: 783.99, d: 0.2, t: 1.25 }, // G5
+                { f: 1046.50, d: 0.8, t: 1.45 }  // C6
+            ];
+
+            notes.forEach(n => {
                 const o = audioCtx.createOscillator();
                 const g = audioCtx.createGain();
                 o.connect(g);
                 g.connect(audioCtx.destination);
-                o.type = 'triangle';
-                o.frequency.value = freq;
-                g.gain.setValueAtTime(0, now + i * 0.1);
-                g.gain.linearRampToValueAtTime(0.1, now + i * 0.1 + 0.05);
-                g.gain.linearRampToValueAtTime(0, now + i * 0.1 + 0.4);
-                o.start(now + i * 0.1);
-                o.stop(now + i * 0.1 + 0.5);
+                o.type = 'square'; // chiptune style
+                o.frequency.value = n.f;
+                g.gain.setValueAtTime(0, now + n.t);
+                g.gain.linearRampToValueAtTime(0.1, now + n.t + 0.05);
+                g.gain.linearRampToValueAtTime(0, now + n.t + n.d);
+                o.start(now + n.t);
+                o.stop(now + n.t + n.d + 0.1);
             });
-        }
-
-        if (type !== 'win') {
-            osc.start(now);
-            osc.stop(now + 0.4);
         }
     }
 

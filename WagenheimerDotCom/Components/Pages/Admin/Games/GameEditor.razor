@@ -1,0 +1,151 @@
+@page "/admin/games/new"
+@page "/admin/games/edit/{Slug}"
+@layout WagenheimerDotCom.Components.Layout.AdminLayout
+@rendermode InteractiveServer
+@attribute [Authorize]
+@inject WagenheimerDotCom.Services.IGameService GameService
+@inject NavigationManager NavManager
+
+<PageTitle>@(IsNew ? "New Game" : "Edit Game") - Admin</PageTitle>
+
+<div class="flex items-center justify-between mb-8">
+    <div class="flex items-center gap-4">
+        <a href="/admin/games" class="p-2 text-slate-400 hover:text-white rounded-lg transition hover:bg-slate-800">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <h1 class="text-2xl font-bold text-white">@(IsNew ? "New Game" : $"Edit: {Game.Title}")</h1>
+    </div>
+
+    <button @onclick="SaveGame" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition disabled:opacity-50" disabled="@isSaving">
+        @if (isSaving)
+        {
+             <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+             <span>Saving...</span>
+        }
+        else
+        {
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span>Save Game</span>
+        }
+    </button>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
+        <h2 class="text-white font-bold text-lg border-b border-slate-700 pb-2">Basic Info</h2>
+        
+        <div>
+            <label class="block text-slate-400 text-xs uppercase font-bold mb-2">Slug (ID)</label>
+            <input @bind="Game.Slug" disabled="@(!IsNew)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition disabled:opacity-50" placeholder="my-game-title" />
+        </div>
+        
+        <div>
+            <label class="block text-slate-400 text-xs uppercase font-bold mb-2">Title</label>
+            <input @bind="Game.Title" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition" />
+        </div>
+
+        <div>
+            <label class="block text-slate-400 text-xs uppercase font-bold mb-2">Cover Image URL</label>
+            <input @bind="Game.CoverImage" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition" placeholder="https://..." />
+            @if(!string.IsNullOrEmpty(Game.CoverImage))
+            {
+                <img src="@Game.CoverImage" class="mt-2 h-32 rounded object-cover border border-slate-700" />
+            }
+        </div>
+        
+         <div>
+            <label class="block text-slate-400 text-xs uppercase font-bold mb-2">Release Date</label>
+            <input type="date" @bind="Game.ReleaseDate" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition" />
+        </div>
+        
+         <div class="flex items-center gap-3 bg-slate-900 p-4 rounded-lg border border-slate-700 mt-4">
+            <input type="checkbox" @bind="Game.IsFeatured" id="featured" class="w-5 h-5 rounded border-slate-700 bg-slate-800 text-blue-600 focus:ring-blue-500" />
+            <label for="featured" class="text-white font-bold cursor-pointer select-none">Feature on Homepage?</label>
+        </div>
+    </div>
+
+    <div class="space-y-6">
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
+            <h2 class="text-white font-bold text-lg border-b border-slate-700 pb-2">Links & Metadata</h2>
+
+            <div>
+                <label class="block text-slate-400 text-xs uppercase font-bold mb-2">Short Description</label>
+                <textarea @bind="Game.Description" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition resize-none"></textarea>
+            </div>
+
+            <div>
+                 <label class="block text-slate-400 text-xs uppercase font-bold mb-2">Tags (Comma separated)</label>
+                 <input value="@TagsString" @onchange="@(e => UpdateTags(e.Value?.ToString()))" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition" placeholder="Action, RPG, 2D" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-slate-400 text-xs uppercase font-bold mb-2">Steam URL</label>
+                    <input @bind="Game.SteamUrl" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition" />
+                </div>
+                <div>
+                     <label class="block text-slate-400 text-xs uppercase font-bold mb-2">Itch.io URL</label>
+                    <input @bind="Game.ItchUrl" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition" />
+                </div>
+                 <div>
+                    <label class="block text-slate-400 text-xs uppercase font-bold mb-2">Google Play URL</label>
+                    <input @bind="Game.PlayStoreUrl" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition" />
+                </div>
+                <div>
+                     <label class="block text-slate-400 text-xs uppercase font-bold mb-2">App Store URL</label>
+                    <input @bind="Game.AppStoreUrl" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Slug { get; set; }
+
+    private WagenheimerDotCom.Models.GameProject Game { get; set; } = new();
+    private bool IsNew => string.IsNullOrEmpty(Slug);
+    private bool isSaving;
+    
+    private string TagsString => string.Join(", ", Game.Tags ?? Array.Empty<string>());
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsNew && Slug != null)
+        {
+            var existing = await GameService.GetGameBySlugAsync(Slug);
+            if (existing != null)
+            {
+                Game = existing;
+            }
+        }
+        else
+        {
+            Game.ReleaseDate = DateTime.Now;
+        }
+    }
+
+    private void UpdateTags(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            Game.Tags = Array.Empty<string>();
+        }
+        else
+        {
+            Game.Tags = value.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(t => t.Trim())
+                                    .ToArray();
+        }
+    }
+
+    private async Task SaveGame()
+    {
+        if(string.IsNullOrEmpty(Game.Title) || string.IsNullOrEmpty(Game.Slug)) return;
+
+        isSaving = true;
+        await GameService.SaveGameAsync(Game);
+        isSaving = false;
+        NavManager.NavigateTo("/admin/games");
+    }
+}

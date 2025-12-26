@@ -1,0 +1,243 @@
+@page "/admin/posts/new"
+@page "/admin/posts/edit/{Slug}"
+@layout WagenheimerDotCom.Components.Layout.AdminLayout
+@rendermode InteractiveServer
+@attribute [Authorize]
+@inject WagenheimerDotCom.Services.IBlogService BlogService
+@inject NavigationManager NavManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>@(IsNew ? "New Post" : "Edit Post") - Admin</PageTitle>
+
+<div class="flex items-center justify-between mb-8">
+    <div class="flex items-center gap-4">
+        <a href="/admin/dashboard" class="p-2 text-slate-400 hover:text-white rounded-lg transition hover:bg-slate-800">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <h1 class="text-2xl font-bold text-white">@(IsNew ? "New Post" : $"Edit: {Slug}")</h1>
+    </div>
+
+    <div class="flex items-center gap-4">
+        <button @onclick="SavePost" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled="@isSaving">
+            @if (isSaving)
+            {
+                <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <span>Saving...</span>
+            }
+            else
+            {
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <span>Save Changes</span>
+            }
+        </button>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Left Column: Settings (Shared & Lang Specific) -->
+    <div class="lg:col-span-1 space-y-6">
+        
+        <!-- Shared Settings -->
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
+            <h2 class="text-white font-bold text-lg border-b border-slate-700 pb-2">Common Settings</h2>
+            
+            <div>
+                <label class="block text-slate-400 text-xs uppercase font-bold mb-2">URL Slug</label>
+                <input @bind="slugInput" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition" placeholder="my-awesome-post" disabled="@(!IsNew)" />
+                <p class="text-slate-500 text-xs mt-1">URL-friendly name. Shared across languages.</p>
+            </div>
+
+            <div>
+                <label class="block text-slate-400 text-xs uppercase font-bold mb-2">Publish Date</label>
+                <input type="date" @bind="sharedDate" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition" />
+            </div>
+        </div>
+
+        <!-- Language Toggle -->
+        <div class="bg-slate-800 p-1 rounded-xl border border-slate-700 flex">
+            <button @onclick='() => SetLanguage("en")' class="flex-1 py-2 px-4 rounded-lg text-sm font-medium transition @(currentLang == "en" ? "bg-blue-600 text-white shadow-lg" : "text-slate-400 hover:text-white")">
+                English 🇺🇸
+            </button>
+            <button @onclick='() => SetLanguage("pt")' class="flex-1 py-2 px-4 rounded-lg text-sm font-medium transition @(currentLang == "pt" ? "bg-blue-600 text-white shadow-lg" : "text-slate-400 hover:text-white")">
+                Portuguese 🇧🇷
+            </button>
+        </div>
+
+        <!-- Localized Meta -->
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
+            <h2 class="text-white font-bold text-lg border-b border-slate-700 pb-2">
+                @(currentLang == "en" ? "English Metadata (SEO)" : "Metadados (SEO)")
+            </h2>
+
+            <div>
+                <label class="block text-slate-400 text-xs uppercase font-bold mb-2">Title</label>
+                <input @bind="CurrentPost.Title" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition" />
+            </div>
+
+            <div>
+                <label class="block text-slate-400 text-xs uppercase font-bold mb-2">Description</label>
+                <textarea @bind="CurrentPost.Description" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition resize-none"></textarea>
+                <p class="text-slate-500 text-xs mt-1">Crucial for SEO. Keep it under 160 chars.</p>
+            </div>
+            
+            <div>
+                <label class="block text-slate-400 text-xs uppercase font-bold mb-2">Tags</label>
+                <input value="@CurrentTagsString" @onchange="@(e => UpdateTags(e.Value?.ToString()))" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition" placeholder="tech, tutorial" />
+                <p class="text-slate-500 text-xs mt-1">Comma separated.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Right Column: Editor -->
+    <div class="lg:col-span-2 flex flex-col gap-4">
+        
+        <!-- Helper Toggle -->
+        <div class="bg-slate-800 rounded-xl border border-slate-700 p-4">
+             <button @onclick="() => showHelp = !showHelp" class="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 font-bold transition">
+                <i data-lucide="help-circle" class="w-4 h-4"></i>
+                <span>@(showHelp ? "Hide Markdown Guide" : "Show Markdown Guide (Images, Video, Code)")</span>
+            </button>
+
+            @if (showHelp)
+            {
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-300 animate-in slide-in-from-top-2">
+                    <div class="space-y-2">
+                        <p><strong class="text-white">Styles:</strong> <code>**Bold**</code>, <code>*Italic*</code></p>
+                        <p><strong class="text-white">Links:</strong> <code>[Title](https://example.com)</code></p>
+                        <p><strong class="text-white">Images:</strong> <code>![Alt](https://link-to-image.jpg)</code></p>
+                        <p class="text-slate-500 italic">For images, use an external URL (e.g. Imgur, S3) or put files in 'wwwroot/images'.</p>
+                    </div>
+                    <div class="space-y-2">
+                        <p><strong class="text-white">Code:</strong> Wrap with 3 backticks:</p>
+                        <pre class="bg-slate-900 p-1 rounded">```csharp
+var x = 1;
+```</pre>
+                        <p><strong class="text-white">YouTube:</strong> Use HTML Embed:</p>
+                        <code class="block bg-slate-900 p-1 rounded break-all">&lt;iframe src="https://www.youtube.com/embed/ID" ...&gt;&lt;/iframe&gt;</code>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden h-full flex flex-col min-h-[500px]">
+             <div class="px-6 py-4 border-b border-slate-700 bg-slate-800 flex justify-between items-center">
+                <span class="text-slate-400 text-xs uppercase font-bold">Content (@currentLang.ToUpper()) - Markdown</span>
+                <span class="text-xs text-slate-500">Auto-saving locally...</span>
+            </div>
+            <div class="flex-1 bg-white text-black">
+                <textarea id="markdown-editor"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Slug { get; set; }
+
+    private bool IsNew => string.IsNullOrEmpty(Slug);
+    private string currentLang = "en";
+    private bool isSaving;
+    private bool showHelp;
+
+    private BlogPost postEn = new() { Date = DateTime.Now };
+    private BlogPost postPt = new() { Date = DateTime.Now };
+
+    private BlogPost CurrentPost => currentLang == "en" ? postEn : postPt;
+    
+    // Derived property for binding tags as string
+    private string CurrentTagsString => string.Join(", ", CurrentPost.Tags ?? Array.Empty<string>());
+
+    private string slugInput = "";
+    private DateTime sharedDate = DateTime.Now;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsNew && Slug != null)
+        {
+            slugInput = Slug;
+            
+            var existingEn = await BlogService.GetPostBySlugAsync(Slug, "en");
+            var existingPt = await BlogService.GetPostBySlugAsync(Slug, "pt");
+
+            if (existingEn != null) postEn = existingEn;
+            if (existingPt != null) postPt = existingPt;
+
+            // Sync shared fields
+            var source = existingEn ?? existingPt;
+            if (source != null)
+            {
+                sharedDate = source.Date;
+                slugInput = source.Slug;
+            }
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("initEasyMDE", DotNetObjectReference.Create(this), CurrentPost.OriginalMarkdown ?? "");
+        }
+    }
+
+    private async Task SetLanguage(string lang)
+    {
+        // 1. Save buffer
+        await UpdateContent(await JSRuntime.InvokeAsync<string>("window.currentMDE.value"));
+
+        currentLang = lang;
+        
+        // 2. Load new content
+        var content = CurrentPost.OriginalMarkdown ?? "";
+        await JSRuntime.InvokeVoidAsync("window.currentMDE.value", content);
+    }
+    
+    private void UpdateTags(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            CurrentPost.Tags = Array.Empty<string>();
+        }
+        else
+        {
+            CurrentPost.Tags = value.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(t => t.Trim())
+                                    .ToArray();
+        }
+    }
+
+    [JSInvokable]
+    public Task UpdateContent(string content)
+    {
+        CurrentPost.OriginalMarkdown = content;
+        return Task.CompletedTask;
+    }
+
+    private async Task SavePost()
+    {
+        isSaving = true;
+
+        await UpdateContent(await JSRuntime.InvokeAsync<string>("window.currentMDE.value"));
+
+        try
+        {
+            // Sync shared fields
+            postEn.Slug = slugInput;
+            postPt.Slug = slugInput;
+            postEn.Date = sharedDate;
+            postPt.Date = sharedDate;
+            
+            // Save each
+            await BlogService.SavePostAsync(postEn, "en");
+            await BlogService.SavePostAsync(postPt, "pt");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        isSaving = false;
+        NavManager.NavigateTo("/admin/dashboard");
+    }
+}

@@ -3,6 +3,7 @@
 @using WagenheimerDotCom.Models
 @inject IStringLocalizer<SharedResource> Loc
 @inject IBlogService BlogService
+@inject IGameService GameService
 
 <PageTitle>Cezar Wagenheimer | Full Stack Developer & Game Creator</PageTitle>
 
@@ -15,26 +16,46 @@
             <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
                 Cezar <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-violet to-brand-cyan">Wagenheimer</span>
             </h1>
-            <p class="text-slate-400 max-w-xl mx-auto text-lg font-light mb-6">
-                Transformando ideias em software há mais de 20 anos. Especialista em .NET, Unity e soluções digitais de alto impacto.
+            <p class="text-slate-400 max-w-xl mx-auto text-lg font-light mb-12 leading-relaxed">
+                Transformando ideias em software há mais de <span class="text-white font-semibold">30 anos</span>. Especialista em <span class="text-brand-cyan">.NET</span>, <span class="text-brand-purple">Apps</span> e soluções digitais de alto impacto.
             </p>
             
             <!-- Stats -->
-            <div class="flex justify-center gap-8 md:gap-12 text-center">
-                <div>
-                    <div class="text-3xl md:text-4xl font-bold text-white">20+</div>
-                    <div class="text-xs text-slate-500 font-mono uppercase tracking-wider">Anos</div>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto mb-16">
+                <!-- XP (First) -->
+                <div class="relative group bg-gradient-to-br from-white/5 to-white/0 border border-white/10 p-6 rounded-2xl flex flex-col items-center justify-center hover:border-brand-cyan/50 transition duration-500 overflow-hidden backdrop-blur-sm">
+                    <div class="absolute inset-0 bg-brand-cyan/20 opacity-0 group-hover:opacity-100 blur-xl transition duration-500"></div>
+                    <i data-lucide="code-2" class="w-8 h-8 text-brand-cyan mb-3 relative z-10 group-hover:scale-110 transition duration-300"></i>
+                    <div class="text-3xl lg:text-4xl font-bold text-white mb-1 relative z-10">30+</div>
+                    <div class="text-xs text-slate-400 font-mono uppercase tracking-widest relative z-10">Anos de XP</div>
                 </div>
-                <div>
-                    <div class="text-3xl md:text-4xl font-bold text-brand-orange">30+</div>
-                    <div class="text-xs text-slate-500 font-mono uppercase tracking-wider">Jogos</div>
+
+                <!-- APPS (Generic) -->
+                <div class="relative group bg-gradient-to-br from-white/5 to-white/0 border border-white/10 p-6 rounded-2xl flex flex-col items-center justify-center hover:border-brand-purple/50 transition duration-500 overflow-hidden backdrop-blur-sm">
+                    <div class="absolute inset-0 bg-brand-purple/20 opacity-0 group-hover:opacity-100 blur-xl transition duration-500"></div>
+                    <i data-lucide="smartphone" class="w-8 h-8 text-brand-purple mb-3 relative z-10 group-hover:scale-110 transition duration-300 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]"></i>
+                    <div class="text-3xl lg:text-4xl font-bold text-white mb-1 relative z-10">Diversos</div>
+                    <div class="text-xs text-slate-400 font-mono uppercase tracking-widest relative z-10">Apps & Sistemas</div>
                 </div>
-                <div>
-                    <div class="text-3xl md:text-4xl font-bold text-brand-purple">5M+</div>
-                    <div class="text-xs text-slate-500 font-mono uppercase tracking-wider">Downloads</div>
+
+                <!-- GAMES -->
+                <div class="relative group bg-gradient-to-br from-white/5 to-white/0 border border-white/10 p-6 rounded-2xl flex flex-col items-center justify-center hover:border-brand-orange/50 transition duration-500 overflow-hidden backdrop-blur-sm">
+                    <div class="absolute inset-0 bg-brand-orange/20 opacity-0 group-hover:opacity-100 blur-xl transition duration-500"></div>
+                    <i data-lucide="gamepad-2" class="w-8 h-8 text-brand-orange mb-3 relative z-10 group-hover:scale-110 transition duration-300"></i>
+                    <div class="text-3xl lg:text-4xl font-bold text-white mb-1 relative z-10">30+</div>
+                    <div class="text-xs text-slate-400 font-mono uppercase tracking-widest relative z-10">Jogos Criados</div>
+                </div>
+
+                <!-- DOWNLOADS -->
+                <div class="relative group bg-gradient-to-br from-white/5 to-white/0 border border-white/10 p-6 rounded-2xl flex flex-col items-center justify-center hover:border-green-400/50 transition duration-500 overflow-hidden backdrop-blur-sm">
+                    <div class="absolute inset-0 bg-green-500/20 opacity-0 group-hover:opacity-100 blur-xl transition duration-500"></div>
+                    <i data-lucide="globe" class="w-8 h-8 text-green-400 mb-3 relative z-10 group-hover:scale-110 transition duration-300"></i>
+                    <div class="text-3xl lg:text-4xl font-bold text-white mb-1 relative z-10">5M+</div>
+                    <div class="text-xs text-slate-400 font-mono uppercase tracking-widest relative z-10">Impacto Global</div>
                 </div>
             </div>
         </div>
+
 
         <!-- GAME AREA -->
         <div class="flex flex-col w-full max-w-[900px] mx-auto gap-4">
@@ -62,11 +83,21 @@
             <div id="game-container" class="w-full shadow-[0_0_60px_rgba(6,182,212,0.1)] border border-white/10">
                 <div class="game-grid"></div>
                 
-                <div id="start-screen" class="overlay-text">
-                    <h2 class="text-5xl md:text-7xl font-cyber font-bold text-white mb-4 drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">READY?</h2>
-                    <button class="bg-gradient-to-r from-brand-purple to-brand-cyan text-white font-mono text-sm font-bold py-3 px-8 rounded-full animate-pulse hover:scale-105 transition shadow-[0_0_30px_rgba(217,70,239,0.4)]">
-                        INICIAR SISTEMA
-                    </button>
+                <div id="start-screen" class="overlay-text cursor-pointer group">
+                    <div class="cursor-pointer group flex flex-col items-center">
+                        <div class="relative mb-6 group-hover:scale-105 transition duration-300">
+                            <h2 class="text-4xl md:text-6xl font-cyber font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-violet to-brand-cyan drop-shadow-[0_0_20px_rgba(6,182,212,0.5)]">
+                                TESTE SUAS<br/>HABILIDADES
+                            </h2>
+                            <div class="absolute -inset-1 blur-xl bg-gradient-to-r from-brand-violet to-brand-cyan opacity-20 group-hover:opacity-40 transition duration-500 animate-pulse"></div>
+                        </div>
+                        
+                        <div class="relative overflow-hidden">
+                            <div class="text-white font-mono text-sm font-bold tracking-[0.2em] bg-black/60 px-8 py-3 rounded border border-brand-cyan/30 group-hover:border-brand-cyan/80 transition shadow-[0_0_15px_rgba(6,182,212,0.2)]">
+                                <span class="animate-pulse">CLIQUE PARA INICIAR</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="powerup-display" class="absolute top-1/2 left-0 w-full pointer-events-none z-30"></div>
@@ -136,7 +167,7 @@
                     Com mais de <span class="text-white font-semibold">20 anos de experiência</span> em desenvolvimento de software, 
                     sou especialista em C#, .NET e Unity. Co-fundador dos estúdios 
                     <span class="text-green-400">Green Sauce Games</span> e <span class="text-cyan-400">Seven Sails Games</span>, 
-                    já lancei mais de 30 jogos e apps com milhões de downloads.
+                    já lancei <span class="text-white font-semibold">diversos apps e mais de 30 jogos</span> com milhões de downloads.
                 </p>
                 <p class="text-slate-400 mb-6 leading-relaxed">
                     Através da <span class="text-blue-400">CWSoftware</span>, ofereço consultoria especializada em 
@@ -373,7 +404,7 @@
                 <h3 class="text-xl font-bold text-white mb-2">CW SOFTWARE</h3>
                 <p class="text-xs font-mono text-blue-400 mb-4 tracking-widest">SOLUÇÕES DIGITAIS</p>
                 <p class="text-slate-400 text-sm leading-relaxed mb-6 flex-grow">
-                    Consultoria especializada em arquitetura de software corporativo, microsserviços e desenvolvimento .NET de alta complexidade. Transformando desafios em soluções.
+                    Especialista em <strong>Aplicativos Mobile Multiplataforma</strong> e <strong>Sistemas Web</strong> de alta performance. Transformando necessidades corporativas em software robusto e escalável.
                 </p>
                 <a href="https://cwsoftware.com.br" target="_blank" class="inline-flex items-center text-sm font-bold text-white hover:text-blue-400 transition">
                     Visitar Site <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
@@ -386,9 +417,9 @@
                     <i data-lucide="gamepad-2" class="w-8 h-8"></i>
                 </div>
                 <h3 class="text-xl font-bold text-white mb-2">GREEN SAUCE GAMES</h3>
-                <p class="text-xs font-mono text-green-400 mb-4 tracking-widest">INDIE GAME STUDIO</p>
+                <p class="text-xs font-mono text-green-400 mb-4 tracking-widest">CASUAL GAMES</p>
                 <p class="text-slate-400 text-sm leading-relaxed mb-6 flex-grow">
-                    Estúdio indie focado em jogos Match-3 e Solitaire de alta qualidade. Séries como Secrets of Magic e Hope's Farm com milhões de downloads.
+                    Estúdio focado em experiências <strong>Premium</strong> de Match-3 e Solitaire para PC, Nintendo Switch e Xbox. Títulos aclamados como <strong>Hope's Farm 2</strong>, <strong>Storm Tale</strong> e <strong>Secrets of Magic</strong>.
                 </p>
                 <a href="https://greensaucegames.com" target="_blank" class="inline-flex items-center text-sm font-bold text-white hover:text-green-400 transition">
                     Ver Jogos <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
@@ -401,9 +432,9 @@
                     <i data-lucide="anchor" class="w-8 h-8"></i>
                 </div>
                 <h3 class="text-xl font-bold text-white mb-2">SEVEN SAILS GAMES</h3>
-                <p class="text-xs font-mono text-cyan-400 mb-4 tracking-widest">ADVENTURE & PUZZLE</p>
+                <p class="text-xs font-mono text-cyan-400 mb-4 tracking-widest">PUZZLE & ADVENTURE</p>
                 <p class="text-slate-400 text-sm leading-relaxed mb-6 flex-grow">
-                    Jogos de aventura casual e puzzles com temática náutica. Séries Queen's Garden e Fables Mosaic para PC e consoles.
+                    Estúdio com mais de 40 títulos lançados globalmente. Meu foco foi na aclamada franquia <strong>Queen's Garden</strong>, sucesso de vendas que une Match-3 e mecânicas de jardinagem.
                 </p>
                 <a href="#" class="inline-flex items-center text-sm font-bold text-white hover:text-cyan-400 transition">
                     Explorar <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
@@ -426,71 +457,59 @@
         </p>
 
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <!-- Game Cards -->
-            <div class="game-card group">
-                <div class="game-cover bg-gradient-to-br from-purple-600 to-pink-600">
-                    <i data-lucide="wand-2" class="w-12 h-12 text-white/80"></i>
-                </div>
-                <h4 class="text-white text-sm font-semibold mt-2">Secrets of Magic 5</h4>
-                <div class="flex gap-1 mt-1">
-                    <span class="platform-tag">Steam</span>
-                    <span class="platform-tag">Switch</span>
-                </div>
-            </div>
-
-            <div class="game-card group">
-                <div class="game-cover bg-gradient-to-br from-green-600 to-emerald-600">
-                    <i data-lucide="flower-2" class="w-12 h-12 text-white/80"></i>
-                </div>
-                <h4 class="text-white text-sm font-semibold mt-2">Hope's Farm 2</h4>
-                <div class="flex gap-1 mt-1">
-                    <span class="platform-tag">Steam</span>
-                    <span class="platform-tag">Mobile</span>
-                </div>
-            </div>
-
-            <div class="game-card group">
-                <div class="game-cover bg-gradient-to-br from-amber-600 to-orange-600">
-                    <i data-lucide="pyramid" class="w-12 h-12 text-white/80"></i>
-                </div>
-                <h4 class="text-white text-sm font-semibold mt-2">Ancient Relics</h4>
-                <div class="flex gap-1 mt-1">
-                    <span class="platform-tag">Steam</span>
-                    <span class="platform-tag">Xbox</span>
-                </div>
-            </div>
-
-            <div class="game-card group">
-                <div class="game-cover bg-gradient-to-br from-blue-600 to-cyan-600">
-                    <i data-lucide="cloud-lightning" class="w-12 h-12 text-white/80"></i>
-                </div>
-                <h4 class="text-white text-sm font-semibold mt-2">Storm Tale 2</h4>
-                <div class="flex gap-1 mt-1">
-                    <span class="platform-tag">Steam</span>
-                </div>
-            </div>
-
-            <div class="game-card group">
-                <div class="game-cover bg-gradient-to-br from-rose-600 to-pink-600">
-                    <i data-lucide="fan" class="w-12 h-12 text-white/80"></i>
-                </div>
-                <h4 class="text-white text-sm font-semibold mt-2">Dreams of a Geisha</h4>
-                <div class="flex gap-1 mt-1">
-                    <span class="platform-tag">Steam</span>
-                    <span class="platform-tag">Mobile</span>
-                </div>
-            </div>
-
-            <div class="game-card group">
-                <div class="game-cover bg-gradient-to-br from-slate-600 to-slate-800">
-                    <i data-lucide="skull" class="w-12 h-12 text-white/80"></i>
-                </div>
-                <h4 class="text-white text-sm font-semibold mt-2">Day of the Dead</h4>
-                <div class="flex gap-1 mt-1">
-                    <span class="platform-tag">Steam</span>
-                    <span class="platform-tag">Switch</span>
-                </div>
-            </div>
+             @if (FeaturedGames != null && FeaturedGames.Any())
+             {
+                 @foreach (var game in FeaturedGames)
+                 {
+                    <div class="game-card group relative overflow-hidden rounded-xl bg-slate-900 border border-slate-700/50 hover:border-slate-500/50 transition-all duration-300">
+                        <div class="game-cover relative aspect-square overflow-hidden">
+                            @if (!string.IsNullOrEmpty(game.CoverImage))
+                            {
+                                 <img src="@game.CoverImage" alt="@game.Title" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="w-full h-full bg-gradient-to-br from-slate-800 to-slate-700 flex items-center justify-center">
+                                    <i data-lucide="gamepad-2" class="w-10 h-10 text-slate-500"></i>
+                                </div>
+                            }
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+                                <span class="text-white text-xs font-bold bg-blue-600 px-2 py-1 rounded">View Details</span>
+                            </div>
+                        </div>
+                        
+                        <div class="p-3">
+                            <h4 class="text-white text-xs md:text-sm font-semibold truncate" title="@game.Title">@game.Title</h4>
+                            <div class="flex gap-1 mt-2 flex-wrap">
+                                @foreach (var tag in game.Tags.Take(2))
+                                {
+                                    <span class="platform-tag text-[10px] bg-slate-800 text-slate-400 border border-slate-700 px-1.5 py-0.5 rounded">@tag</span>
+                                }
+                            </div>
+                        </div>
+                        
+                        <!-- Link Overlay -->
+                         @if (!string.IsNullOrEmpty(game.SteamUrl))
+                         {
+                             <a href="@game.SteamUrl" target="_blank" class="absolute inset-0 z-10" aria-label="View @game.Title on Steam"></a>
+                         }
+                         else if (!string.IsNullOrEmpty(game.ItchUrl))
+                         {
+                             <a href="@game.ItchUrl" target="_blank" class="absolute inset-0 z-10" aria-label="View @game.Title on Itch.io"></a>
+                         }
+                         else if (!string.IsNullOrEmpty(game.PlayStoreUrl))
+                         {
+                             <a href="@game.PlayStoreUrl" target="_blank" class="absolute inset-0 z-10" aria-label="View @game.Title on Play Store"></a>
+                         }
+                    </div>
+                 }
+             }
+             else
+             {
+                  <div class="col-span-full py-12 text-center text-slate-500">
+                      <p>Nenhum jogo em destaque no momento.</p>
+                  </div>
+             }
         </div>
 
         <div class="text-center mt-10">
@@ -563,37 +582,88 @@
                 <p class="text-slate-400">Tem um projeto em mente? Entre em contato para discutirmos como posso ajudar.</p>
             </div>
 
-            <form class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-xs font-mono text-slate-500 uppercase">Nome</label>
-                        <input type="text" class="w-full bg-obsidian border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-violet transition">
+            @if (formSent)
+            {
+                <div class="bg-green-500/10 border border-green-500/20 rounded-xl p-8 text-center animate-fade-in">
+                    <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="check" class="w-8 h-8 text-green-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2">Mensagem Enviada!</h3>
+                    <p class="text-slate-400 mb-6">Obrigado pelo contato. Retornarei em breve.</p>
+                    <button @onclick="ResetForm" class="text-brand-cyan hover:underline font-mono text-sm">Enviar nova mensagem</button>
+                </div>
+            }
+            else
+            {
+                <EditForm Model="@contactModel" OnValidSubmit="HandleContactSubmit" class="space-y-6">
+                    <DataAnnotationsValidator />
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-xs font-mono text-slate-500 uppercase">Nome</label>
+                            <InputText @bind-Value="contactModel.Name" class="w-full bg-obsidian border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-violet transition" />
+                            <ValidationMessage For="@(() => contactModel.Name)" class="text-red-400 text-xs" />
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-mono text-slate-500 uppercase">Email</label>
+                            <InputText @bind-Value="contactModel.Email" class="w-full bg-obsidian border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-violet transition" />
+                            <ValidationMessage For="@(() => contactModel.Email)" class="text-red-400 text-xs" />
+                        </div>
                     </div>
                     <div class="space-y-2">
-                        <label class="text-xs font-mono text-slate-500 uppercase">Email</label>
-                        <input type="email" class="w-full bg-obsidian border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-violet transition">
+                        <label class="text-xs font-mono text-slate-500 uppercase">Mensagem</label>
+                        <InputTextArea @bind-Value="contactModel.Message" rows="4" class="w-full bg-obsidian border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-violet transition" />
+                        <ValidationMessage For="@(() => contactModel.Message)" class="text-red-400 text-xs" />
                     </div>
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-mono text-slate-500 uppercase">Mensagem</label>
-                    <textarea rows="4" class="w-full bg-obsidian border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-violet transition"></textarea>
-                </div>
-                <button type="button" class="w-full bg-gradient-to-r from-brand-violet to-brand-cyan hover:opacity-90 text-white font-bold py-4 rounded-lg transition shadow-lg">
-                    ENVIAR MENSAGEM
-                </button>
-            </form>
+                    <button type="submit" disabled="@isSubmitting" class="w-full bg-gradient-to-r from-brand-violet to-brand-cyan hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-lg transition shadow-lg flex items-center justify-center gap-2">
+                        @if (isSubmitting)
+                        {
+                            <span class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+                            <span>ENVIANDO...</span>
+                        }
+                        else
+                        {
+                            <span>ENVIAR MENSAGEM</span>
+                        }
+                    </button>
+                </EditForm>
+            }
         </div>
     </div>
 </section>
 
 <script src="js/game.js"></script>
 
+@inject IContactService ContactService
+
 @code {
     private IEnumerable<BlogPost>? latestPosts;
+    private IEnumerable<WagenheimerDotCom.Models.GameProject>? FeaturedGames;
+
+    private ContactRequest contactModel = new();
+    private bool isSubmitting = false;
+    private bool formSent = false;
 
     protected override async Task OnInitializedAsync()
     {
         var allPosts = await BlogService.GetPostsAsync();
         latestPosts = allPosts.Take(3);
+        
+        var allGames = await GameService.GetGamesAsync();
+        FeaturedGames = allGames.Where(g => g.IsFeatured);
+    }
+    
+    private async Task HandleContactSubmit()
+    {
+        isSubmitting = true;
+        await Task.Delay(500); // UI feel
+        await ContactService.SendMessageAsync(contactModel);
+        isSubmitting = false;
+        formSent = true;
+    }
+
+    private void ResetForm()
+    {
+        contactModel = new();
+        formSent = false;
     }
 }
