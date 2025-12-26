@@ -4,8 +4,6 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: wagenheimer_app
-    ports:
-      - "8080:8080"
     restart: always
     environment:
       - ASPNETCORE_URLS=http://+:8080
